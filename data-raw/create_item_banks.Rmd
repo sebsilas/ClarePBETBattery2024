@@ -1,0 +1,299 @@
+
+
+
+```{r, message = FALSE}
+
+library(tidyverse)
+
+```
+
+
+```{r}
+
+test_pars <- readxl::read_excel('test_parameters.xlsx')
+
+```
+
+
+```{r}
+
+sort_mel_nos <- function(df) {
+  df %>% 
+    pull(`BERKOWITZ MELODIES`) %>% 
+    purrr::map(~strsplit(.x, split = ",")) %>% 
+    unlist() %>% 
+    as.integer()
+}
+
+```
+
+
+```{r}
+
+group_1 <- test_pars %>% 
+  slice(1:3)  %>% 
+  sort_mel_nos() %>% 
+  tibble::tibble(stimulus = ., 
+                 melody_group = "1")
+
+group_2 <- test_pars %>% 
+  slice(4:6)  %>% 
+  sort_mel_nos() %>% 
+  tibble::tibble(stimulus = ., 
+                 melody_group = "2")
+
+
+
+group_3 <- test_pars %>% 
+  slice(7:8)  %>% 
+  sort_mel_nos() %>% 
+  tibble::tibble(stimulus = ., 
+                 melody_group = "3")
+
+
+group_4 <- test_pars %>% 
+  slice(9:10)  %>% 
+  sort_mel_nos()  %>% 
+  tibble::tibble(stimulus = ., 
+                 melody_group = "4")
+
+
+```
+
+
+```{r}
+
+suzuki_item_bank <- rbind(group_1, group_2, group_3, group_4) %>% 
+  relocate(melody_group) %>% 
+  na.omit %>% 
+  dplyr::rowwise() %>% 
+  mutate(file_key = paste0("Berkowitz", stimulus)) %>% 
+  ungroup()
+
+
+```
+
+
+```{r}
+
+suzuki_item_bank_ngram <- suzuki_item_bank
+
+suzuki_item_bank_phrase <- suzuki_item_bank
+
+suzuki_item_bank <-  suzuki_item_bank %>% 
+  left_join(Berkowitz::item_item_bank, by = "file_key")
+
+
+suzuki_item_bank_ngram <- suzuki_item_bank_ngram %>% 
+  rowwise() %>% 
+  mutate(midi_file = paste0(file_key, ".mid")) %>% 
+  ungroup() %>% 
+  left_join(Berkowitz::ngram_item_bank, by = "midi_file")
+
+
+suzuki_item_bank_phrase <- suzuki_item_bank_phrase %>% 
+  rowwise() %>% 
+  mutate(midi_file = paste0(file_key, ".mid")) %>% 
+  ungroup() %>% 
+  left_join(Berkowitz::phrase_item_bank, by = "midi_file") %>% 
+  filter(N %in% 3:15)
+
+```
+
+
+
+```{r}
+
+suzuki_item_bank %>% 
+  writexl::write_xlsx('suzuki_item_bank.xlsx')
+
+suzuki_item_bank_ngram %>% 
+  writexl::write_xlsx('suzuki_item_bank_ngram.xlsx')
+
+suzuki_item_bank_phrase %>% 
+  writexl::write_xlsx('suzuki_item_bank_phrase.xlsx')
+
+```
+
+
+Check features
+
+```{r}
+
+suzuki_item_bank %>% 
+  select(melody_group, mean_int_size, N, tonalness) %>% 
+  pivot_longer(mean_int_size:tonalness, names_to = "Feature", values_to = "Value") %>% 
+  rename(`Melody Group` = melody_group) %>% 
+    ggplot(aes(x = Feature, y = Value, fill = `Melody Group`, group = `Melody Group`)) +
+      geom_bar(position = "dodge", stat = "summary", fun = "mean") +
+      facet_wrap(~Feature, scales = "free") +
+      theme_minimal()
+
+
+```
+
+
+```{r}
+
+suzuki_item_bank_ngram %>% 
+  select(melody_group, mean_int_size, N, tonalness) %>% 
+  pivot_longer(mean_int_size:tonalness, names_to = "Feature", values_to = "Value") %>% 
+  rename(`Melody Group` = melody_group) %>% 
+    ggplot(aes(x = Feature, y = Value, fill = `Melody Group`, group = `Melody Group`)) +
+      geom_bar(position = "dodge", stat = "summary", fun = "mean") +
+      facet_wrap(~Feature, scales = "free") +
+      theme_minimal()
+
+
+```
+
+```{r}
+
+suzuki_item_bank_phrase %>% 
+  select(melody_group, mean_int_size, N, tonalness) %>% 
+  pivot_longer(mean_int_size:tonalness, names_to = "Feature", values_to = "Value") %>% 
+  rename(`Melody Group` = melody_group) %>% 
+    ggplot(aes(x = Feature, y = Value, fill = `Melody Group`, group = `Melody Group`)) +
+      geom_bar(position = "dodge", stat = "summary", fun = "mean") +
+      facet_wrap(~Feature, scales = "free") +
+      theme_minimal()
+
+
+```
+
+
+Clare's selection
+
+```{r}
+
+suzuki_phrase <- readxl::read_excel('Selected_Berk_4april.xlsx') %>% 
+  filter(grepl("phrase", item_id)) %>% 
+  left_join(suzuki_item_bank_phrase, by = "item_id") 
+
+```
+
+
+```{r}
+
+phrase_arrhythmic_difficulty <- predict(Berkowitz::lm2.2,
+                      newdata = suzuki_phrase %>% mutate(log_freq = 0),
+                      re.form = NA) %>% # this instructs the model to predict without random effects )
+                      as.numeric %>%
+                      magrittr::multiply_by(-1) %>%
+                      scales::rescale()
+
+phrase_rhythmic_difficulty <- predict(Berkowitz::lm3.2,
+                                 newdata = suzuki_phrase %>% mutate(log_freq = 0),
+                                 re.form = NA)
+
+
+suzuki_phrase <- suzuki_phrase %>% 
+  mutate(arrhythmic_difficulty = phrase_arrhythmic_difficulty,
+         rhythmic_difficulty = phrase_rhythmic_difficulty) 
+
+```
+
+
+
+```{r}
+
+suzuki_ngram <- readxl::read_excel('Selected_Berk_4april.xlsx') %>% 
+  filter(grepl("ngram", item_id)) %>% 
+  left_join(suzuki_item_bank_ngram, by = "item_id") 
+
+```
+
+```{r}
+
+joint_names <- intersect(names(suzuki_phrase), names(suzuki_ngram))
+
+suzuki_selected_item_bank <- rbind(
+  suzuki_phrase %>% select(all_of(joint_names)),
+  suzuki_ngram %>% select(all_of(joint_names))
+) %>% 
+  select(-`Yes or No`)
+
+```
+
+
+Put in keys: G, D, A for violin; C, G, D for viola/cello
+
+We work out the key based on the *full* melody
+
+```{r}
+
+berkowitz_keys <- Berkowitz::item_item_bank %>% 
+  dplyr::as_tibble() %>% 
+  select(abs_melody, file_key) %>%
+  rowwise() %>% 
+  mutate(key = musicassessr::get_implicit_harmonies( itembankr::str_mel_to_vector(abs_melody) )$key ) %>% 
+  ungroup()
+
+
+use_data(berkowitz_keys)
+
+```
+
+
+```{r}
+
+suzuki_selected_item_bank <- suzuki_selected_item_bank %>% 
+  left_join(berkowitz_keys %>% select(file_key, key), by = "file_key") 
+
+
+```
+
+
+```{r}
+
+suzuki_selected_item_bank <- suzuki_selected_item_bank %>% 
+  rowwise() %>% 
+  mutate(lowest_note = min(itembankr::str_mel_to_vector(abs_melody), na.rm = TRUE),
+         highest_note = max(itembankr::str_mel_to_vector(abs_melody), na.rm = TRUE)
+         ) %>% 
+  ungroup()
+
+```
+
+
+```{r}
+
+suzuki_selected_item_bank_violin <- suzuki_selected_item_bank %>% 
+  mutate(instrument = "Violin",
+         abs_melody = case_when(lowest_note < 55 ~ paste0(itembankr::str_mel_to_vector(abs_melody) + 12, collapse = ","), TRUE ~ abs_melody ) ) %>% 
+  ungroup()
+
+```
+
+```{r}
+
+suzuki_selected_item_bank_cello <- suzuki_selected_item_bank %>% 
+  mutate(instrument = "Cello",
+         abs_melody = case_when(highest_note > 72 ~ paste0(itembankr::str_mel_to_vector(abs_melody) - 12, collapse = ","), TRUE ~ abs_melody ) ) %>% 
+  ungroup()
+
+```
+
+
+
+
+
+```{r}
+
+use_data(suzuki_selected_item_bank, suzuki_selected_item_bank_violin, suzuki_selected_item_bank_cello, overwrite = TRUE)
+
+```
+
+
+```{r}
+
+use_data(suzuki_item_bank, 
+         suzuki_item_bank_ngram, 
+         suzuki_item_bank_phrase, compress = 'xz', overwrite = TRUE)
+
+```
+
+
+
+
+
