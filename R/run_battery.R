@@ -5,6 +5,7 @@
 #' @param title
 #' @param app_name
 #' @param instrument
+#' @param musicassessr_aws
 #'
 #' @return
 #' @export
@@ -12,7 +13,8 @@
 #' @examples
 run_battery <- function(title = "Playing by Ear",
                         app_name = 'pbetsuzuki2024',
-                        instrument = c("Violin", "Cello")) {
+                        instrument = c("Violin", "Cello"),
+                        musicassessr_aws = FALSE) {
 
   instrument <- match.arg(instrument)
 
@@ -31,7 +33,8 @@ run_battery <- function(title = "Playing by Ear",
     elts = tl,
 
     opt = musicassessr::musicassessr_opt(setup_pages = FALSE,
-                                         visual_notation = TRUE),
+                                         visual_notation = TRUE,
+                                         musicassessr_aws = musicassessr_aws),
 
     final_page = psychTestR::final_page("Thank you for taking part in the test!")
 

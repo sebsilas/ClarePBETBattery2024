@@ -7,11 +7,12 @@
 run_battery(
   title = "Playing by Ear",
   app_name = "pbetsuzuki2024",
-  instrument = c("Violin", "Cello")
+  instrument = c("Violin", "Cello"),
+  musicassessr_aws = FALSE
 )
 }
 \arguments{
-\item{instrument}{}
+\item{musicassessr_aws}{}
 }
 \description{
 Run the Suzuki Battery
