@@ -106,8 +106,8 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Cello")) {
                        rhythmic = nrow(stimuli$block_2_arrhythmic),
                        wjd_audio = list(key_easy = 0L, key_hard = 0L)),
       num_examples = PBET::no_examples(),
-      skip_setup = TRUE,
-
+      SNR_test = FALSE,
+      get_range = FALSE,
       max_goes = 3L,
       melody_length = 3:15,
       presampled_item_bank = TRUE,
@@ -129,7 +129,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Cello")) {
                        rhythmic = nrow(stimuli$block_2_arrhythmic),
                        wjd_audio = list(key_easy = 0L, key_hard = 0L)),
       num_examples = PBET::no_examples(),
-      skip_setup = TRUE,
+      skip_setup = TRUE, # We skip all setup for this
       max_goes = 1L,
       melody_length = 3:15,
       presampled_item_bank = TRUE,
