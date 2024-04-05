@@ -83,7 +83,9 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Cello")) {
     SAA::SAA(app_name = 'pbetsuzuki2024',
              num_items = list(long_tones = 6L,
                               arrhythmic = 5L,
-                              rhythmic = 5L)),
+                              rhythmic = 5L),
+             absolute_url = "https://musicassessr.com/suzuki-pbet-2024/",
+             allow_SNR_failure = TRUE),
 
 
     #   - PBE
