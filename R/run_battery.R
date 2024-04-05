@@ -34,6 +34,7 @@ run_battery <- function(title = "Playing by Ear",
 
     opt = musicassessr::musicassessr_opt(setup_pages = FALSE,
                                          visual_notation = TRUE,
+                                         app_name = app_name,
                                          musicassessr_aws = musicassessr_aws),
 
     final_page = psychTestR::final_page("Thank you for taking part in the test!")
@@ -53,30 +54,26 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Cello"), app_nam
 
   psychTestR::join(
 
-
-    # TODO - study info + consent (consentr)
-
-
-    # - demographics (age, gender, nationality, highest educational level obtained.
-
-    psyquest::DEG(),
-
-
-    # - GMSI-musical training subscale
-
-    psyquest::GMS(subscales = "Musical Training"),
-
-    # - Concurrent musical activities
-
-    psyquest::CCM(),
-
-    custom_questions(),
-
-
+    # # - demographics (age, gender, nationality, highest educational level obtained.
     #
-    # - JAJ (8 items)
-
-    JAJ::JAJ(num_items = 8L),
+    # psyquest::DEG(),
+    #
+    #
+    # # - GMSI-musical training subscale
+    #
+    # psyquest::GMS(subscales = "Musical Training"),
+    #
+    # # - Concurrent musical activities
+    #
+    # psyquest::CCM(),
+    #
+    # custom_questions(),
+    #
+    #
+    # #
+    # # - JAJ (8 items)
+    #
+    # JAJ::JAJ(num_items = 8L),
 
     #  - SAA (5 rhythmic, 5 arhythmic items)
 
