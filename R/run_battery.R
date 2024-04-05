@@ -19,7 +19,7 @@ run_battery <- function(title = "Playing by Ear",
   instrument <- match.arg(instrument)
 
   tl <- function() {
-    suzuki_tl(instrument = instrument)
+    suzuki_tl(instrument = instrument, app_name = app_name)
   }
 
   musicassessr::make_musicassessr_test(
@@ -44,7 +44,7 @@ run_battery <- function(title = "Playing by Ear",
 }
 
 
-suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Cello")) {
+suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Cello"), app_name) {
 
   instrument <- match.arg(instrument)
 
@@ -80,7 +80,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Cello")) {
 
     #  - SAA (5 rhythmic, 5 arhythmic items)
 
-    SAA::SAA(app_name = 'pbetsuzuki2024',
+    SAA::SAA(app_name = app_name,
              num_items = list(long_tones = 6L,
                               arrhythmic = 5L,
                               rhythmic = 5L),
@@ -96,6 +96,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Cello")) {
 
 
     PBET::PBET(
+      app_name = app_name,
       # experiment_id = 3L, # For Clare's exp
       # experiment_id = 1L # For dev/testing
       arrhythmic_item_bank = stimuli$block_1_arrhythmic %>% itembankr::set_item_bank_class(),
@@ -119,6 +120,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Cello")) {
     psychTestR::one_button_page("Now you will only have one go at each melody"),
 
     PBET::PBET(
+      app_name = app_name,
       # experiment_id = 3L, # For Clare's exp
       # experiment_id = 1L # For dev/testing
       arrhythmic_item_bank = stimuli$block_1_arrhythmic %>% itembankr::set_item_bank_class(),
