@@ -19,7 +19,7 @@ run_battery <- function(title = "Playing by Ear",
   instrument <- match.arg(instrument)
 
   tl <- function() {
-    suzuki_tl(instrument = instrument, app_name = app_name)
+    suzuki_tl(instrument = instrument, app_name = app_name, musicassessr_aws = musicassessr_aws)
   }
 
   musicassessr::make_musicassessr_test(
@@ -45,7 +45,7 @@ run_battery <- function(title = "Playing by Ear",
 }
 
 
-suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Cello"), app_name) {
+suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Cello"), app_name, musicassessr_aws) {
 
   instrument <- match.arg(instrument)
 
@@ -82,7 +82,8 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Cello"), app_nam
                               arrhythmic = 5L,
                               rhythmic = 5L),
              absolute_url = "https://musicassessr.com/suzuki-pbet-2024/",
-             allow_SNR_failure = TRUE),
+             allow_SNR_failure = TRUE,
+             musicassessr_aws = musicassessr_aws),
 
 
     #   - PBE
@@ -111,7 +112,8 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Cello"), app_nam
       presampled_item_bank = TRUE,
       default_range = musicassessr::set_default_range(instrument),
       gold_msi = FALSE,
-      demographics = FALSE
+      demographics = FALSE,
+      musicassessr_aws = musicassessr_aws
     ),
 
     psychTestR::one_button_page("Now you will only have one go at each melody"),
@@ -135,7 +137,8 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Cello"), app_nam
       default_range = musicassessr::set_default_range(instrument),
       show_introduction = FALSE,
       gold_msi = FALSE,
-      demographics = FALSE
+      demographics = FALSE,
+      musicassessr_aws = musicassessr_aws
     )
 
     # Other PBET block..
