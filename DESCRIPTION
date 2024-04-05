@@ -12,8 +12,10 @@ LazyData: true
 Imports: 
     consentr (>= 0.1.0),
     dplyr,
+    JAJ (>= 0.1.7),
     magrittr,
     musicassessr (>= 1.5.4),
+    PBET (>= 1.0.0),
     psychTestR (>= 2.25.0),
     psyquest (>= 1.3.20),
     SAA (>= 1.2.1),
@@ -23,7 +25,9 @@ Remotes:
     pmcharrison/psychTestR,
     sebsilas/musicassessr,
     sebsilas/consentr,
-    sebsilas/SAA
+    sebsilas/SAA,
+    klausfrieler/JAJ,
+    sebsilas/PBET
 Depends: 
     R (>= 2.10),
     stringr
