@@ -162,42 +162,44 @@ suzuki_item_bank_phrase %>%
 ```
 
 
+
+
+
 Clare's selection
 
+We get the phrase and ngram sets separately so we can join the items on
+
+
+
 ```{r}
 
-suzuki_phrase <- readxl::read_excel('Selected_Berk_4april.xlsx') %>% 
-  filter(grepl("phrase", item_id)) %>% 
-  left_join(suzuki_item_bank_phrase, by = "item_id") 
+is.scalar.na <- function(x) {
+  all(is.na(x)) & length(x) == 1
+}
+
+is.scalar.null <- function(x) {
+  all(is.null(x)) & length(x) == 0
+}
+
+is.scalar.na.or.null <- function(x) {
+  is.scalar.na(x) | is.scalar.null(x)
+}
+
+```
+
+```{r}
+
+suzuki_phrase <- readxl::read_excel('Berk Final Vn Vla Cello 10April v2.xlsx') %>% 
+  dplyr::filter(grepl("phrase", item_id)) %>% 
+  dplyr::left_join(suzuki_item_bank_phrase, by = "item_id") 
 
 ```
 
 
-```{r}
-
-phrase_arrhythmic_difficulty <- predict(Berkowitz::lm2.2,
-                      newdata = suzuki_phrase %>% mutate(log_freq = 0),
-                      re.form = NA) %>% # this instructs the model to predict without random effects )
-                      as.numeric %>%
-                      magrittr::multiply_by(-1) %>%
-                      scales::rescale()
-
-phrase_rhythmic_difficulty <- predict(Berkowitz::lm3.2,
-                                 newdata = suzuki_phrase %>% mutate(log_freq = 0),
-                                 re.form = NA)
-
-
-suzuki_phrase <- suzuki_phrase %>% 
-  mutate(arrhythmic_difficulty = phrase_arrhythmic_difficulty,
-         rhythmic_difficulty = phrase_rhythmic_difficulty) 
-
-```
-
-
 
 ```{r}
 
-suzuki_ngram <- readxl::read_excel('Selected_Berk_4april.xlsx') %>% 
+suzuki_ngram <- readxl::read_excel('Berk Final Vn Vla Cello 10April v2.xlsx') %>% 
   filter(grepl("ngram", item_id)) %>% 
   left_join(suzuki_item_bank_ngram, by = "item_id") 
 
@@ -210,10 +212,65 @@ joint_names <- intersect(names(suzuki_phrase), names(suzuki_ngram))
 suzuki_selected_item_bank <- rbind(
   suzuki_phrase %>% select(all_of(joint_names)),
   suzuki_ngram %>% select(all_of(joint_names))
-) %>% 
-  select(-`Yes or No`)
+)
 
 ```
+
+
+```{r}
+
+suzuki_selected_item_bank <- suzuki_selected_item_bank %>% 
+  rowwise() %>% 
+  mutate(prompt = paste0("The starting note is ", `Vn start note`, " and finger number is ", `Violin finger/string`, ".") ) %>% 
+  ungroup()
+
+
+```
+
+
+
+```{r}
+
+suzuki_selected_item_bank <- suzuki_selected_item_bank %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    pyin = list(pyin::pyin(paste0(
+    system.file('Berk_Cut_melodies_violin_noclick', package = 'ClarePBETBattery2024'), "/", `Violin Audio File name`))),
+    opti3 = if(is.scalar.na.or.null(unlist(pyin))) NA else musicassessr::get_opti3(stimuli = itembankr::str_mel_to_vector(abs_melody), 
+                      stimuli_durations = itembankr::str_mel_to_vector(durations), 
+                      stimuli_length = N, user_input_as_pyin = pyin, segment_phrase = FALSE)
+    ) %>% 
+  dplyr::ungroup()
+
+
+
+```
+
+
+
+Add difficulties
+
+```{r}
+
+phrase_arrhythmic_difficulty <- predict(Berkowitz::lm2.2,
+                      newdata = suzuki_selected_item_bank %>% mutate(log_freq = 0),
+                      re.form = NA) %>% # this instructs the model to predict without random effects )
+                      as.numeric %>%
+                      magrittr::multiply_by(-1) %>%
+                      scales::rescale()
+
+phrase_rhythmic_difficulty <- predict(Berkowitz::lm3.2,
+                                 newdata = suzuki_selected_item_bank %>% mutate(log_freq = 0),
+                                 re.form = NA)
+
+
+suzuki_selected_item_bank <- suzuki_selected_item_bank %>% 
+  mutate(arrhythmic_difficulty = phrase_arrhythmic_difficulty,
+         rhythmic_difficulty = phrase_rhythmic_difficulty) 
+
+```
+
+
 
 
 Put in keys: G, D, A for violin; C, G, D for viola/cello
@@ -248,7 +305,9 @@ suzuki_selected_item_bank <- suzuki_selected_item_bank %>%
 
 suzuki_selected_item_bank <- suzuki_selected_item_bank %>% 
   rowwise() %>% 
-  mutate(lowest_note = min(itembankr::str_mel_to_vector(abs_melody), na.rm = TRUE),
+  mutate(
+         first_note = itembankr::str_mel_to_vector(abs_melody)[1],
+         lowest_note = min(itembankr::str_mel_to_vector(abs_melody), na.rm = TRUE),
          highest_note = max(itembankr::str_mel_to_vector(abs_melody), na.rm = TRUE)
          ) %>% 
   ungroup()
@@ -256,11 +315,32 @@ suzuki_selected_item_bank <- suzuki_selected_item_bank %>%
 ```
 
 
+
+
+```{r}
+
+hist(suzuki_selected_item_bank$opti3$ngrukkon)
+
+```
+
+```{r}
+
+
+suzuki_selected_item_bank %>% 
+  unnest_wider(opti3) %>% 
+  select(item_id, ngrukkon) %>% 
+  writexl::write_xlsx('clare_opti3_check_v2.xlsx')
+
+```
+
+
+
 ```{r}
 
 suzuki_selected_item_bank_violin <- suzuki_selected_item_bank %>% 
-  mutate(instrument = "Violin",
-         abs_melody = case_when(lowest_note < 55 ~ paste0(itembankr::str_mel_to_vector(abs_melody) + 12, collapse = ","), TRUE ~ abs_melody ) ) %>% 
+  mutate(instrument = "Violin") %>% 
+  rowwise() %>% 
+  mutate(abs_melody = if(lowest_note < 55) paste0(itembankr::str_mel_to_vector(abs_melody) + 12, collapse = ",") else  abs_melody ) %>% 
   ungroup()
 
 ```
@@ -273,6 +353,8 @@ suzuki_selected_item_bank_cello <- suzuki_selected_item_bank %>%
   ungroup()
 
 ```
+
+
 
 
 
@@ -292,6 +374,8 @@ use_data(suzuki_item_bank,
          suzuki_item_bank_phrase, compress = 'xz', overwrite = TRUE)
 
 ```
+
+
 
 
 

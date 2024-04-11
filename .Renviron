@@ -1,0 +1,11 @@
+MUSICASSESSR_DB_NAME='melody_dev'
+MUSICASSESSR_DB_USER='musicassessr'
+MUSICASSESSR_DB_PASSWORD='fZ7cv0LQ8L4j'
+MUSICASSESSR_DB_HOST='melody.csrfnleurwwu.eu-central-1.rds.amazonaws.com'
+MUSICASSESSR_DB_PORT='5432'
+
+API_URL="https://255uxe6ajl.execute-api.us-east-1.amazonaws.com/api"
+BUCKET_NAME="shinny-app-source-41630"
+BUCKET_REGION="us-east-1"
+IDENTITY_POOL_ID="us-east-1:feecdf7e-cdf6-416f-94d0-a6de428c8c6b"
+DESTINATION_BUCKET="shinny-app-destination-41630"

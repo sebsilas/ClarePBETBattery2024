@@ -18,7 +18,7 @@ get_blocks <- function(num_items = 24,
 
   item_bank <- if(instrument == "Violin") suzuki_selected_item_bank_violin else if (instrument == "Cello") suzuki_selected_item_bank_cello else stop("Hm?")
 
-  suzuki_item_bank_ngram_sample <- item_bank %>%
+  item_bank_sample <- item_bank %>%
     dplyr::filter(N %in% melody_length) %>%
     dplyr::group_by(melody_group) %>%
     dplyr::slice_sample(n = num_items/4) %>% # 4 == no melody groups
@@ -26,8 +26,8 @@ get_blocks <- function(num_items = 24,
 
 
 
-  item_blocks <- suzuki_item_bank_ngram_sample %>%
-    split_item_black_into_blocks()
+  item_blocks <- item_bank_sample %>%
+    split_item_bank_into_blocks()
 
 
   block_1 <- item_blocks$block_1
@@ -35,14 +35,14 @@ get_blocks <- function(num_items = 24,
 
   # Block 1 arrhythmic vs. rhythmic
   block_1_sub_blocks <- block_1 %>%
-    split_item_black_into_blocks()
+    split_item_bank_into_blocks()
 
   block_1_arrhythmic <- block_1_sub_blocks$block_1
   block_1_rhythmic <- block_1_sub_blocks$block_2
 
   # Block 2 arrhythmic vs. rhythmic
   block_2_sub_blocks <- block_2 %>%
-    split_item_black_into_blocks()
+    split_item_bank_into_blocks()
 
   block_2_arrhythmic <- block_2_sub_blocks$block_1
   block_2_rhythmic <- block_2_sub_blocks$block_2
@@ -63,7 +63,7 @@ get_blocks <- function(num_items = 24,
 
 
 
-split_item_black_into_blocks <- function(df) {
+split_item_bank_into_blocks <- function(df) {
   num_items <- nrow(df)
   block_1_items_idxes <- sample(1:num_items, size = num_items/2)
   block_1_items <- df[block_1_items_idxes, ]
@@ -76,3 +76,5 @@ split_item_black_into_blocks <- function(df) {
     block_2 = block_2_items
   )
 }
+
+

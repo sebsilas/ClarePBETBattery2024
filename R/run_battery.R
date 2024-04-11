@@ -47,10 +47,16 @@ run_battery <- function(title = "Playing by Ear",
 
 suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Cello"), app_name, musicassessr_aws) {
 
+  print('suz')
+  print(app_name)
+  print(musicassessr_aws)
+
   instrument <- match.arg(instrument)
 
 
   stimuli <- get_blocks(instrument = instrument)
+
+  audio_block <- suzuki_audio_block()
 
   psychTestR::join(
 
@@ -74,6 +80,10 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Cello"), app_nam
     # # - JAJ (8 items)
     #
     # JAJ::JAJ(num_items = 8L),
+
+    musicassessr::setup_pages(skip_setup = 'except_microphone'),
+
+    audio_block,
 
     #  - SAA (5 rhythmic, 5 arhythmic items)
 
@@ -148,5 +158,40 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Cello"), app_nam
 
 
 
+suzuki_audio_block <- function() {
 
+  shiny::addResourcePath(prefix = 'audio',
+                  directoryPath = system.file('Berk_Cut_melodies_violin_noclick', package = 'ClarePBETBattery2024'))
+
+
+  purrr::pmap(suzuki_selected_item_bank, iterate_row)
+}
+
+
+
+# Function to convert row to dataframe
+iterate_row <- function(...) {
+
+  # Convert the row to a DF
+  tb_row <- tibble::as_tibble(list(...))
+
+  audio_file <- tb_row$`Audio File name`
+
+  audio_file_path <- paste0('audio/', audio_file)
+
+  musicassessr::present_stimuli(
+    stimuli = audio_file_path,
+    stimuli_type = "audio",
+    display_modality = "auditory",
+    page_type = "record_audio_page",
+    get_answer = musicassessr::get_answer_pyin_melodic_production,
+    hideOnPlay = TRUE,
+    page_label = audio_file,
+    answer_meta_data = tb_row,
+    trigger_end_of_stimulus_fun = musicassessr::paradigm(paradigm_type = "call_and_response")$trigger_end_of_stimulus_fun
+  )
+
+}
+
+# debug(get('get_opti3', asNamespace('musicassessr')))
 
