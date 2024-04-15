@@ -1,16 +1,17 @@
 
 
 
-#' Get blocks
+#' Get items
 #'
 #' @param num_items
 #' @param melody_length
+#' @param instrument
 #'
 #' @return
 #' @export
 #'
 #' @examples
-get_blocks <- function(num_items = 24,
+get_items <- function(num_items = 12,
                        melody_length = 3:15,
                        instrument = c("Violin", "Cello") ) {
 
@@ -25,40 +26,7 @@ get_blocks <- function(num_items = 24,
     dplyr::ungroup()
 
 
-
-  item_blocks <- item_bank_sample %>%
-    split_item_bank_into_blocks()
-
-
-  block_1 <- item_blocks$block_1
-  block_2 <- item_blocks$block_2
-
-  # Block 1 arrhythmic vs. rhythmic
-  block_1_sub_blocks <- block_1 %>%
-    split_item_bank_into_blocks()
-
-  block_1_arrhythmic <- block_1_sub_blocks$block_1
-  block_1_rhythmic <- block_1_sub_blocks$block_2
-
-  # Block 2 arrhythmic vs. rhythmic
-  block_2_sub_blocks <- block_2 %>%
-    split_item_bank_into_blocks()
-
-  block_2_arrhythmic <- block_2_sub_blocks$block_1
-  block_2_rhythmic <- block_2_sub_blocks$block_2
-
-  # Order by rough difficulty
-  block_1_arrhythmic <- dplyr::arrange(block_1_arrhythmic, arrhythmic_difficulty)
-  block_1_rhythmic <- dplyr::arrange(block_1_rhythmic, rhythmic_difficulty)
-  block_2_arrhythmic <- dplyr::arrange(block_2_arrhythmic, arrhythmic_difficulty)
-  block_2_rhythmic <- dplyr::arrange(block_2_rhythmic, rhythmic_difficulty)
-
-  list(
-    block_1_arrhythmic = block_1_arrhythmic,
-    block_1_rhythmic = block_1_rhythmic,
-    block_2_arrhythmic = block_2_arrhythmic,
-    block_2_rhythmic = block_2_rhythmic
-  )
+  return(item_bank_sample)
 }
 
 

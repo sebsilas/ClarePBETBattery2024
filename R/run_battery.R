@@ -53,68 +53,66 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
   inst_id <- if(instrument == "Violin") 14L else if(instrument == "Viola") 15L else if(instrument == "Cello") 16L else stop("Not a valid instrument")
 
-  stimuli <- get_blocks(instrument = instrument)
+  stimuli <- get_items(instrument = instrument)
 
 
   audio_block <- psychTestR::join(
     psychTestR::one_button_page("Now you will play back some melodies as audio"),
-    suzuki_audio_block(stimuli$block_1_rhythmic, instrument)
+    suzuki_audio_block(stimuli, instrument)
   )
 
 
   psychTestR::join(
 
     # - demographics (age, gender, nationality, highest educational level obtained.
-
-    psyquest::DEG(),
-
-
-    # - GMSI-musical training subscale
-
-    psyquest::GMS(subscales = "Musical Training"),
-
-    # - Concurrent musical activities
-
-    psyquest::CCM(),
-
-    custom_questions(),
-
-
-    #
-    # - JAJ (8 items)
-
-    JAJ::JAJ(num_items = 8L)
+#
+#     psyquest::DEG(),
+#
+#
+#     # - GMSI-musical training subscale
+#
+#     psyquest::GMS(subscales = "Musical Training"),
+#
+#     # - Concurrent musical activities
+#
+#     psyquest::CCM(),
+#
+#     custom_questions(),
+#
+#
+#     #
+#     # - JAJ (8 items)
+#
+#     JAJ::JAJ(num_items = 8L),
 
     #  - SAA (5 rhythmic, 5 arhythmic items)
 
-    # psychTestR::one_button_page(
-    #   shiny::tags$div(
-    #     shiny::tags$link(rel="stylesheet", type="text/css", href="https://musicassessr.com/assets/css/style_songbird.css"),
-    #     shiny::tags$script("var upload_to_s3 = true; console.log('Turning S3 mode on');"),
-    #     shiny::tags$p(paste0("Let's proceed!"))
-    #   )
-    # ),
-
-    #musicassessr::setup_pages(skip_setup = "except_microphone"),
+    psychTestR::one_button_page(
+      shiny::tags$div(
+        shiny::tags$link(rel="stylesheet", type="text/css", href="https://musicassessr.com/assets/css/style_songbird.css"),
+        shiny::tags$script("var upload_to_s3 = true; console.log('Turning S3 mode on');"),
+        shiny::tags$p(paste0("Let's proceed!"))
+      )
+    ),
 
 
-    # SAA::SAA(app_name = app_name,
-    #          num_items = list(
-    #                           #long_tones = 6L,
-    #                           long_tones = 0L,
-    #                           arrhythmic = 5L,
-    #                           rhythmic = 5L),
-    #          absolute_url = "https://musicassessr.com/suzuki-pbet-2024/",
-    #          skip_setup = 'except_microphone',
-    #          experiment_id = 1L, # dev
-    #          musicassessr_aws = TRUE,
-    #          use_musicassessr_db = TRUE,
-    #          demographics = FALSE,
-    #          gold_msi = FALSE,
-    #          asynchronous_api_mode = TRUE,
-    #          user_id = 60L, # Clare experiment user
-    #          get_answer_melodic = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3
-    #          ),
+    SAA::SAA(app_name = app_name,
+             num_items = list(
+                              #long_tones = 6L,
+                              long_tones = 0L,
+                              arrhythmic = 0L,
+                              rhythmic = 5L),
+             absolute_url = "https://musicassessr.com/suzuki-pbet-2024/",
+             skip_setup = 'except_microphone',
+             experiment_id = 1L, # dev
+             musicassessr_aws = TRUE,
+             use_musicassessr_db = TRUE,
+             demographics = FALSE,
+             gold_msi = FALSE,
+             asynchronous_api_mode = TRUE,
+             user_id = 60L, # Clare experiment user
+             get_answer_melodic = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3
+             ),
 
 
     #   - PBE
@@ -124,95 +122,35 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
     #
 
 
-    # Just use PBET wrapper for instructions and setup?
+    # Just use PBET wrapper for instructions and setup, but append audio block at end?
 
-    # PBET::PBET(
-    #   app_name = app_name,
-    #   # experiment_id = 3L, # For Clare's exp
-    #   experiment_id = 1L, # For dev/testing
-    #   num_items = list(interval_perception = 0L,
-    #                    find_this_note = 0L,
-    #                    arrhythmic = 0L,
-    #                    rhythmic = 0L, # We're only using for the instructions
-    #                    wjd_audio = list(key_easy = 0L, key_hard = 0L)),
-    #   # arrhythmic_item_bank = stimuli$block_1_arrhythmic %>% itembankr::set_item_bank_class(), # We don't actually use this..
-    #   # rhythmic_item_bank = stimuli$block_1_rhythmic %>% itembankr::set_item_bank_class(),
-    #   num_examples = PBET::no_examples(),
-    #   skip_setup = TRUE, # this is done at the musicassessr_test level
-    #   max_goes = 3L,
-    #   melody_length = 3:15,
-    #   #presampled_item_bank = TRUE,
-    #   default_range = musicassessr::set_default_range(instrument),
-    #   gold_msi = FALSE,
-    #   demographics = FALSE,
-    #   musicassessr_aws = TRUE,
-    #   use_musicassessr_db = TRUE,
-    #   asynchronous_api_mode = TRUE,
-    #   get_answer_function_audio = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3,
-    #   user_id = 60L, # Clare experiment user,
-    #   append_trial_block_after = audio_block,
-    #   instrument_id = inst_id
-    # ),
-
-
-    # PBET::PBET(
-    #   app_name = app_name,
-    #   # experiment_id = 3L, # For Clare's exp
-    #   experiment_id = 1L, # For dev/testing
-    #   arrhythmic_item_bank = stimuli$block_1_arrhythmic %>% itembankr::set_item_bank_class(),
-    #   rhythmic_item_bank = stimuli$block_1_rhythmic %>% itembankr::set_item_bank_class(),
-    #   num_items = list(interval_perception = 0L,
-    #                    find_this_note = 0L,
-    #                    arrhythmic = nrow(stimuli$block_1_arrhythmic),
-    #                    rhythmic = nrow(stimuli$block_2_arrhythmic),
-    #                    wjd_audio = list(key_easy = 0L, key_hard = 0L)),
-    #   num_examples = PBET::no_examples(),
-    #   skip_setup = TRUE,
-    #   max_goes = 3L,
-    #   melody_length = 3:15,
-    #   presampled_item_bank = TRUE,
-    #   default_range = musicassessr::set_default_range(instrument),
-    #   gold_msi = FALSE,
-    #   demographics = FALSE,
-    #   musicassessr_aws = TRUE,
-    #   use_musicassessr_db = TRUE,
-    #   asynchronous_api_mode = TRUE,
-    #   get_answer_function_audio = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3,
-    #   user_id = 60L, # Clare experiment user,
-    #   append_trial_block_before = audio_block,
-    #   instrument_id = inst_id
-    # ),
-
-    #psychTestR::one_button_page("Now you will only have one go at each melody")
-
-    # PBET::PBET(
-    #   app_name = app_name,
-    #   # experiment_id = 3L, # For Clare's exp
-    #   # experiment_id = 1L # For dev/testing
-    #   arrhythmic_item_bank = stimuli$block_1_arrhythmic %>% itembankr::set_item_bank_class(),
-    #   rhythmic_item_bank = stimuli$block_1_rhythmic %>% itembankr::set_item_bank_class(),
-    #   num_items = list(interval_perception = 0L,
-    #                    find_this_note = 0L,
-    #                    arrhythmic = nrow(stimuli$block_1_arrhythmic),
-    #                    rhythmic = nrow(stimuli$block_2_arrhythmic),
-    #                    wjd_audio = list(key_easy = 0L, key_hard = 0L)),
-    #   num_examples = PBET::no_examples(),
-    #   experiment_id = 1L,
-    #   skip_setup = TRUE, # We skip all setup for this
-    #   max_goes = 1L,
-    #   melody_length = 3:15,
-    #   presampled_item_bank = TRUE,
-    #   default_range = musicassessr::set_default_range(instrument),
-    #   show_introduction = FALSE,
-    #   gold_msi = FALSE,
-    #   demographics = FALSE,
-    #   musicassessr_aws = TRUE,
-    #   use_musicassessr_db = TRUE,
-    #   asynchronous_api_mode = TRUE,
-    #   get_answer_function_audio = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3,
-    #   user_id = 60L, # Clare experiment user
-    #   instrument_id = inst_id
-    # )
+    PBET::PBET(
+      app_name = app_name,
+      # experiment_id = 3L, # For Clare's exp
+      experiment_id = 1L, # For dev/testing
+      num_items = list(interval_perception = 0L,
+                       find_this_note = 0L,
+                       arrhythmic = 0L,
+                       rhythmic = 0L, # We're only using for the instructions
+                       wjd_audio = list(key_easy = 0L, key_hard = 0L)),
+      # arrhythmic_item_bank = stimuli$block_1_arrhythmic %>% itembankr::set_item_bank_class(), # We don't actually use this..
+      # rhythmic_item_bank = stimuli$block_1_rhythmic %>% itembankr::set_item_bank_class(),
+      num_examples = PBET::no_examples(),
+      skip_setup = TRUE, # this is done at the musicassessr_test level
+      max_goes = 3L,
+      melody_length = 3:15,
+      #presampled_item_bank = TRUE,
+      default_range = musicassessr::set_default_range(instrument),
+      gold_msi = FALSE,
+      demographics = FALSE,
+      musicassessr_aws = TRUE,
+      use_musicassessr_db = TRUE,
+      asynchronous_api_mode = TRUE,
+      get_answer_function_audio = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3,
+      user_id = 60L, # Clare experiment user,
+      append_trial_block_after = audio_block,
+      instrument_id = inst_id
+    )
 
     # Other PBET block..
   ) %>% consentr::consent(need_age_consent = FALSE)
@@ -288,7 +226,8 @@ iterate_row <- function(..., instrument = c("Violin", "Viola", "Cello")) {
       answer_meta_data = tb_row,
       trigger_end_of_stimulus_fun = musicassessr::paradigm(paradigm_type = "call_and_response")$trigger_end_of_stimulus_fun,
       db_vars = db_vars,
-      audio_playback_as_single_play_button = FALSE # eventually change
+      use_musicassessr_db = TRUE,
+      audio_playback_as_single_play_button = TRUE # eventually change
     )
 
   })

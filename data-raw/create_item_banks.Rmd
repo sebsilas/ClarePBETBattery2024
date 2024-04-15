@@ -5,6 +5,20 @@
 
 library(tidyverse)
 
+
+is.scalar.na <- function(x) {
+  all(is.na(x)) & length(x) == 1
+}
+
+is.scalar.null <- function(x) {
+  all(is.null(x)) & length(x) == 0
+}
+
+is.scalar.na.or.null <- function(x) {
+  is.scalar.na(x) | is.scalar.null(x)
+}
+
+
 ```
 
 
@@ -173,23 +187,7 @@ We get the phrase and ngram sets separately so we can join the items on
 
 ```{r}
 
-is.scalar.na <- function(x) {
-  all(is.na(x)) & length(x) == 1
-}
-
-is.scalar.null <- function(x) {
-  all(is.null(x)) & length(x) == 0
-}
-
-is.scalar.na.or.null <- function(x) {
-  is.scalar.na(x) | is.scalar.null(x)
-}
-
-```
-
-```{r}
-
-suzuki_phrase <- readxl::read_excel('Berk Final Vn Vla Cello 10April v2.xlsx') %>% 
+suzuki_phrase <- readxl::read_excel('Berk Final Vn Vla Cello 11April.xlsx') %>% 
   dplyr::filter(grepl("phrase", item_id)) %>% 
   dplyr::left_join(suzuki_item_bank_phrase, by = "item_id") 
 
@@ -199,7 +197,7 @@ suzuki_phrase <- readxl::read_excel('Berk Final Vn Vla Cello 10April v2.xlsx') %
 
 ```{r}
 
-suzuki_ngram <- readxl::read_excel('Berk Final Vn Vla Cello 10April v2.xlsx') %>% 
+suzuki_ngram <- readxl::read_excel('Berk Final Vn Vla Cello 11April.xlsx') %>% 
   filter(grepl("ngram", item_id)) %>% 
   left_join(suzuki_item_bank_ngram, by = "item_id") 
 
@@ -212,45 +210,18 @@ joint_names <- intersect(names(suzuki_phrase), names(suzuki_ngram))
 suzuki_selected_item_bank <- rbind(
   suzuki_phrase %>% select(all_of(joint_names)),
   suzuki_ngram %>% select(all_of(joint_names))
-)
+) %>% # NB. For now remove NA vals
+  na.omit
 
 ```
 
-
-```{r}
-
-suzuki_selected_item_bank <- suzuki_selected_item_bank %>% 
-  rowwise() %>% 
-  mutate(prompt = paste0("The starting note is ", `Vn start note`, " and finger number is ", `Violin finger/string`, ".") ) %>% 
-  ungroup()
-
-
-```
-
-
-
-```{r}
-
-suzuki_selected_item_bank <- suzuki_selected_item_bank %>% 
-  dplyr::rowwise() %>% 
-  dplyr::mutate(
-    pyin = list(pyin::pyin(paste0(
-    system.file('Berk_Cut_melodies_violin_noclick', package = 'ClarePBETBattery2024'), "/", `Violin Audio File name`))),
-    opti3 = if(is.scalar.na.or.null(unlist(pyin))) NA else musicassessr::get_opti3(stimuli = itembankr::str_mel_to_vector(abs_melody), 
-                      stimuli_durations = itembankr::str_mel_to_vector(durations), 
-                      stimuli_length = N, user_input_as_pyin = pyin, segment_phrase = FALSE)
-    ) %>% 
-  dplyr::ungroup()
-
-
-
-```
 
 
 
 Add difficulties
 
-```{r}
+```{r, message = FALSE, warning = FALSE}
+
 
 phrase_arrhythmic_difficulty <- predict(Berkowitz::lm2.2,
                       newdata = suzuki_selected_item_bank %>% mutate(log_freq = 0),
@@ -315,32 +286,14 @@ suzuki_selected_item_bank <- suzuki_selected_item_bank %>%
 ```
 
 
-
-
-```{r}
-
-hist(suzuki_selected_item_bank$opti3$ngrukkon)
-
-```
-
-```{r}
-
-
-suzuki_selected_item_bank %>% 
-  unnest_wider(opti3) %>% 
-  select(item_id, ngrukkon) %>% 
-  writexl::write_xlsx('clare_opti3_check_v2.xlsx')
-
-```
-
-
-
 ```{r}
 
 suzuki_selected_item_bank_violin <- suzuki_selected_item_bank %>% 
   mutate(instrument = "Violin") %>% 
   rowwise() %>% 
-  mutate(abs_melody = if(lowest_note < 55) paste0(itembankr::str_mel_to_vector(abs_melody) + 12, collapse = ",") else  abs_melody ) %>% 
+  mutate(abs_melody = if(lowest_note < 55) paste0(itembankr::str_mel_to_vector(abs_melody) + 12, collapse = ",") else  abs_melody,
+         prompt = paste0("The starting note is ", `Vn start note`, " and finger number is ", `Violin finger/string`, ".") ) %>% 
+
   ungroup()
 
 ```
@@ -349,12 +302,274 @@ suzuki_selected_item_bank_violin <- suzuki_selected_item_bank %>%
 
 suzuki_selected_item_bank_cello <- suzuki_selected_item_bank %>% 
   mutate(instrument = "Cello",
-         abs_melody = case_when(highest_note > 72 ~ paste0(itembankr::str_mel_to_vector(abs_melody) - 12, collapse = ","), TRUE ~ abs_melody ) ) %>% 
+         abs_melody = case_when(highest_note > 72 ~ paste0(itembankr::str_mel_to_vector(abs_melody) - 12, collapse = ","), TRUE ~ abs_melody ),
+         prompt = paste0("The starting note is ", `Cello start note`, " and finger number is ", `Cello finger/string`, ".") ) %>% 
   ungroup()
 
 ```
 
 
+
+
+
+
+Check opti3
+
+-- Violin
+
+```{r}
+
+
+suzuki_selected_item_bank_violin <- suzuki_selected_item_bank_violin %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    pyin = list(pyin::pyin(paste0(
+    system.file('Berk_Cut_melodies_violin_noclick', package = 'ClarePBETBattery2024'), "/", `Violin Audio File name`))),
+    opti3 = if(is.scalar.na.or.null(unlist(pyin))) NA else musicassessr::get_opti3(stimuli = itembankr::str_mel_to_vector(abs_melody), 
+                      stimuli_durations = itembankr::str_mel_to_vector(durations), 
+                      stimuli_length = N, user_input_as_pyin = pyin, segment_phrase = FALSE)) %>% 
+  ungroup()
+
+
+```
+
+```{r}
+
+
+apply_ed <- function(melody, pyin_df) {
+  
+    if(is.scalar.na.or.null(pyin_df)) {
+    return(NA)
+  }
+  
+  
+  transcribed_intervals <- paste0(diff(pyin_df$note), collapse = ",")
+
+
+  edit_sim(melody, transcribed_intervals)
+
+}
+
+
+suzuki_selected_item_bank_violin <- suzuki_selected_item_bank_violin %>% 
+  rowwise() %>% 
+  mutate(
+    int_edit_dist = apply_ed(melody, pyin) 
+    ) %>% 
+  dplyr::ungroup()
+
+
+```
+
+
+```{r}
+
+
+apply_ngrukkon2 <- function(melody, pyin_df) {
+  
+  if(is.scalar.na.or.null(pyin_df)) {
+    return(NA)
+  }
+  
+  
+ musicassessr::ngrukkon(x = itembankr::str_mel_to_vector(melody), y = diff(pyin_df$note), N = 2)
+ 
+}
+
+apply_ngrukkon2_dur_weighted <- function(melody, durations, pyin_df) {
+  
+  if(is.scalar.na.or.null(pyin_df)) {
+    return(NA)
+  }
+  
+  browser()
+  
+ musicassessr::ngrukkon(x = itembankr::str_mel_to_vector(melody), y = diff(pyin_df$note), N = 2)
+ 
+}
+
+# ngrukkon
+
+
+suzuki_selected_item_bank_violin <- suzuki_selected_item_bank_violin %>% 
+  rowwise() %>% 
+  mutate(
+    #ngrukkon2 = apply_ngrukkon2(melody, pyin)
+    ngrukkon2_dur_weighted = apply_ngrukkon2_dur_weighted(melody, durations, pyin)
+    ) %>% 
+  dplyr::ungroup()
+
+
+```
+
+
+```{r}
+
+
+
+
+
+edit_dist <- function(s, t){
+  adist(s,t)[1,1]
+}
+
+edit_sim <- function(s, t){
+  1 - edit_dist(s, t)/max(nchar(s), nchar(t))
+}
+
+
+v1 <- c(3, 3, 4, -2, -2, -1, 3, -7)
+
+v2 <- c(3, 3, 4, 0, 0, -2, -2, -1, 3, -7)
+
+
+
+edit_sim(paste0(v1, collapse = ","), paste0(v2, collapse = ","))
+
+```
+
+```{r}
+
+
+edit_dist(intToUtf8(v1), intToUtf8(v2))
+
+
+
+```
+
+
+```{r}
+
+mean(suzuki_selected_item_bank_violin$int_edit_dist, na.rm = TRUE)
+
+mean(suzuki_selected_item_bank_violin$ngrukkon2, na.rm = TRUE)
+
+```
+
+
+```{r}
+
+problem_violin <- suzuki_selected_item_bank_violin %>% 
+  unnest_wider(opti3) %>% 
+  filter(!near(ngrukkon, 1) | is.na(ngrukkon)) %>% 
+  arrange(ngrukkon)
+
+```
+
+
+```{r}
+
+avg_ngrukkon <- mean(problem_violin$ngrukkon, na.rm = TRUE)
+
+avg_ngrukkon
+
+# 0.482089
+
+```
+
+
+```{r}
+
+
+problem_violin <- problem_violin %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    pyin2 = list(pyin::pyin(paste0(
+    system.file('Berk_Cut_melodies_violin_noclick', package = 'ClarePBETBattery2024'), "/", `Violin Audio File name`), normalise = TRUE,
+    transform_file = "~/ClarePBETBattery2024/pyin_par_skel_optimised.ttl"
+    )),
+    opti3_2 = if(is.scalar.na.or.null(unlist(pyin2))) NA else musicassessr::get_opti3(stimuli = itembankr::str_mel_to_vector(abs_melody), 
+                      stimuli_durations = itembankr::str_mel_to_vector(durations), 
+                      stimuli_length = N, user_input_as_pyin = pyin2, segment_phrase = FALSE)
+    ) %>% 
+  dplyr::ungroup()
+
+```
+
+
+
+```{r}
+
+problem_violin <- problem_violin %>% 
+  select(-c(transposition, ngrukkon, rhythfuzz, harmcore, opti3)) %>% 
+  unnest_wider(opti3_2) %>% 
+  filter(!near(ngrukkon, 1) | is.na(ngrukkon)) %>% 
+  arrange(ngrukkon)
+
+```
+
+```{r}
+
+problem_violin <- problem_violin %>% 
+  filter(!near(ngrukkon, 1) | is.na(ngrukkon)) %>% 
+  arrange(ngrukkon)
+
+```
+
+```{r}
+
+avg_ngrukkon <- mean(problem_violin$ngrukkon, na.rm = TRUE)
+
+avg_ngrukkon
+
+```
+
+
+
+```{r}
+
+hist(suzuki_selected_item_bank_violin$opti3$ngrukkon)
+
+```
+
+```{r}
+
+
+suzuki_selected_item_bank_violin %>% 
+  unnest_wider(opti3) %>% 
+  select(item_id, ngrukkon) %>% 
+  writexl::write_xlsx('clare_opti3_check_violin.xlsx')
+
+```
+
+
+
+-- Cello
+
+```{r}
+
+suzuki_selected_item_bank_cello <- suzuki_selected_item_bank_cello %>% 
+  dplyr::rowwise() %>% 
+  dplyr::mutate(
+    pyin = list(pyin::pyin(paste0(
+    system.file('Berk_Cut_melodies_cello_noclick', package = 'ClarePBETBattery2024'), "/", `Cello Audio File Name`))),
+    opti3 = if(is.scalar.na.or.null(unlist(pyin))) NA else musicassessr::get_opti3(stimuli = itembankr::str_mel_to_vector(abs_melody), 
+                      stimuli_durations = itembankr::str_mel_to_vector(durations), 
+                      stimuli_length = N, user_input_as_pyin = pyin, segment_phrase = FALSE)
+    ) %>% 
+  dplyr::ungroup()
+
+
+
+```
+
+
+
+```{r}
+
+hist(suzuki_selected_item_bank_violin$opti3$ngrukkon)
+
+```
+
+```{r}
+
+
+suzuki_selected_item_bank_violin %>% 
+  unnest_wider(opti3) %>% 
+  select(item_id, ngrukkon) %>% 
+  writexl::write_xlsx('clare_opti3_check_violin.xlsx')
+
+```
 
 
 
