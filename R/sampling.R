@@ -17,7 +17,7 @@ get_items <- function(num_items = 12,
 
   instrument <- match.arg(instrument)
 
-  item_bank <- if(instrument == "Violin") suzuki_selected_item_bank_violin else if (instrument == "Cello") suzuki_selected_item_bank_cello else stop("Hm?")
+  item_bank <- if(instrument == "Violin") ClarePBETBattery2024::suzuki_selected_item_bank_violin else if (instrument == "Cello") ClarePBETBattery2024::suzuki_selected_item_bank_cello else stop("Hm?")
 
   item_bank_sample <- item_bank %>%
     dplyr::filter(N %in% melody_length) %>%
