@@ -65,25 +65,25 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
   psychTestR::join(
 
     # - demographics (age, gender, nationality, highest educational level obtained.
-#
-#     psyquest::DEG(),
-#
-#
-#     # - GMSI-musical training subscale
-#
-#     psyquest::GMS(subscales = "Musical Training"),
-#
-#     # - Concurrent musical activities
-#
-#     psyquest::CCM(),
-#
-#     custom_questions(),
-#
-#
-#     #
-#     # - JAJ (8 items)
-#
-#     JAJ::JAJ(num_items = 8L),
+
+    psyquest::DEG(),
+
+
+    # - GMSI-musical training subscale
+
+    psyquest::GMS(subscales = "Musical Training"),
+
+    # - Concurrent musical activities
+
+    psyquest::CCM(),
+
+    custom_questions(),
+
+
+    #
+    # - JAJ (8 items)
+
+    JAJ::JAJ(num_items = 8L),
 
     #  - SAA (5 rhythmic, 5 arhythmic items)
 
