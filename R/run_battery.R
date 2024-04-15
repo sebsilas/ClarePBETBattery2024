@@ -162,7 +162,7 @@ suzuki_audio_block <- function(selected_audio, instrument = c("Violin", "Cello")
 
   instrument <- match.arg(instrument)
 
-  file_path <- if(instrument == "Violin") 'Berk_Cut_melodies_violin_noclick' else if(instrument == "Cello") "Berk-Cut_melodies_cello_noclick" else stop ("Not valid instrument")
+  file_path <- if(instrument == "Violin") 'Berk_Cut_melodies_violin_noclick' else if(instrument == "Cello") "Berk_Cut_melodies_cello_noclick" else stop ("Not valid instrument")
 
   shiny::addResourcePath(prefix = 'audio',
                   directoryPath = system.file(file_path, package = 'ClarePBETBattery2024'))
@@ -180,8 +180,6 @@ iterate_row <- function(..., instrument = c("Violin", "Viola", "Cello")) {
 
   # Convert the row to a DF
   tb_row <- tibble::as_tibble(list(...))
-
-  #browser()
 
   audio_file <- tb_row$`Audio File name`
 
