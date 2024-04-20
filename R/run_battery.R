@@ -83,7 +83,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
     #
     # - JAJ (8 items)
 
-    JAJ::JAJ(num_items = 8L),
+    JAJ::JAJ(num_items = 8L)
 
   )
 
