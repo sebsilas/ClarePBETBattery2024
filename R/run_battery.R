@@ -5,6 +5,7 @@
 #' @param title
 #' @param app_name
 #' @param instrument
+#' @param show_non_music_tests
 #'
 #' @return
 #' @export
@@ -12,12 +13,13 @@
 #' @examples
 run_battery <- function(title = "Playing by Ear",
                         app_name = 'pbetsuzuki2024',
-                        instrument = c("Violin", "Cello")) {
+                        instrument = c("Violin", "Cello"),
+                        show_non_music_tests = TRUE) {
 
   instrument <- match.arg(instrument)
 
   tl <- function() {
-    suzuki_tl(instrument = instrument, app_name = app_name)
+    suzuki_tl(instrument = instrument, app_name = app_name, show_non_music_tests = show_non_music_tests)
   }
 
   musicassessr::make_musicassessr_test(
@@ -47,7 +49,7 @@ run_battery <- function(title = "Playing by Ear",
 }
 
 
-suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello"), app_name) {
+suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello"), app_name, show_non_music_tests = TRUE) {
 
   instrument <- match.arg(instrument)
 
@@ -61,28 +63,34 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
     suzuki_audio_block(stimuli, instrument)
   )
 
-
-  psychTestR::join(
+  non_music_tests <- psychTestR::join(
 
     # - demographics (age, gender, nationality, highest educational level obtained.
 
-    # psyquest::DEG(),
+    psyquest::DEG(),
+
+
+    # - GMSI-musical training subscale
+
+    psyquest::GMS(subscales = "Musical Training"),
+
+    # - Concurrent musical activities
+
+    psyquest::CCM(),
+
+    custom_questions(),
+
     #
-    #
-    # # - GMSI-musical training subscale
-    #
-    # psyquest::GMS(subscales = "Musical Training"),
-    #
-    # # - Concurrent musical activities
-    #
-    # psyquest::CCM(),
-    #
-    # custom_questions(),
-    #
-    # #
-    # # - JAJ (8 items)
-    #
-    # JAJ::JAJ(num_items = 8L),
+    # - JAJ (8 items)
+
+    JAJ::JAJ(num_items = 8L),
+
+  )
+
+
+  psychTestR::join(
+
+    if(show_non_music_tests) non_music_tests,
 
     #  - SAA (5 rhythmic, 5 arhythmic items)
 

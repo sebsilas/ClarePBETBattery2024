@@ -9,3 +9,4 @@ BUCKET_NAME="shinny-app-source-41630"
 BUCKET_REGION="us-east-1"
 IDENTITY_POOL_ID="us-east-1:feecdf7e-cdf6-416f-94d0-a6de428c8c6b"
 DESTINATION_BUCKET="shinny-app-destination-41630"
+ENDPOINT_URL='https://api.songbird.training/'
