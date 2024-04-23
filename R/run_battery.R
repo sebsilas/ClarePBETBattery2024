@@ -139,14 +139,12 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
                        find_this_note = 0L,
                        arrhythmic = 0L,
                        rhythmic = 0L, # We're only using for the instructions
-                       wjd_audio = list(key_easy = 0L, key_hard = 0L)),
-      # arrhythmic_item_bank = stimuli$block_1_arrhythmic %>% itembankr::set_item_bank_class(), # We don't actually use this..
-      # rhythmic_item_bank = stimuli$block_1_rhythmic %>% itembankr::set_item_bank_class(),
+                       wjd_audio = list(key_easy = 0L, key_hard = 0L)
+                       ),
       num_examples = PBET::no_examples(),
       skip_setup = TRUE, # this is done at the musicassessr_test level
       max_goes = 3L,
       melody_length = 3:15,
-      #presampled_item_bank = TRUE,
       default_range = musicassessr::set_default_range(instrument),
       gold_msi = FALSE,
       demographics = FALSE,
@@ -232,7 +230,7 @@ iterate_row <- function(..., instrument = c("Violin", "Viola", "Cello")) {
       trigger_end_of_stimulus_fun = musicassessr::paradigm(paradigm_type = "call_and_response")$trigger_end_of_stimulus_fun,
       db_vars = db_vars,
       use_musicassessr_db = TRUE,
-      audio_playback_as_single_play_button = TRUE # eventually change
+      audio_playback_as_single_play_button = TRUE
     )
 
   })
