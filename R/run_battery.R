@@ -187,7 +187,9 @@ iterate_row <- function(..., instrument = c("Violin", "Viola", "Cello")) {
   # Convert the row to a DF
   tb_row <- tibble::as_tibble(list(...))
 
-  audio_file <- tb_row$`Audio File name`
+  if(instrument == "Violin") {
+    audio_file <- tb_row$`Violin Audio File name`
+  }
 
   audio_file_path <- paste0('audio/', audio_file)
 
@@ -219,7 +221,7 @@ iterate_row <- function(..., instrument = c("Violin", "Viola", "Cello")) {
       display_modality = "auditory",
       page_title = "Play the melody by ear",
       page_text = shiny::tags$div(
-                    shiny::tags$p("Play the melody by ear then clip Stop when you are finished."),
+                    shiny::tags$p("Play the melody by ear then click Stop when you are finished."),
                     shiny::tags$p(tb_row$prompt)
                     ),
       page_type = "record_audio_page",

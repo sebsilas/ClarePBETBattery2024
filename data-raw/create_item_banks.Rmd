@@ -582,14 +582,6 @@ use_data(suzuki_selected_item_bank, suzuki_selected_item_bank_violin, suzuki_sel
 ```
 
 
-```{r}
-
-use_data(suzuki_item_bank, 
-         suzuki_item_bank_ngram, 
-         suzuki_item_bank_phrase, compress = 'xz', overwrite = TRUE)
-
-```
-
 
 
 

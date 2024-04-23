@@ -20,17 +20,17 @@ get_items <- function(num_items = 12,
   if(instrument == "Violin")  {
 
     item_bank <- ClarePBETBattery2024::suzuki_selected_item_bank_violin
-
     file_path <-'Berk_Cut_melodies_violin_noclick'
-
     audio_files <- list.files(system.file(file_path, package = 'ClarePBETBattery2024'))
 
     item_bank <- item_bank %>%
-      dplyr::filter(`Audio File name` %in% audio_files)
+      dplyr::filter(`Violin Audio File name` %in% audio_files)
 
   } else if (instrument == "Cello")  {
+
     item_bank <- ClarePBETBattery2024::suzuki_selected_item_bank_cello
     file_path <- "Berk_Cut_melodies_cello_noclick"
+
   } else {
     stop("Not valid instrument")
   }
