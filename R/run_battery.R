@@ -143,7 +143,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
                        ),
       num_examples = PBET::no_examples(),
       skip_setup = TRUE, # this is done at the musicassessr_test level
-      max_goes = 3L,
+      max_goes = 1L,
       melody_length = 3:15,
       default_range = musicassessr::set_default_range(instrument),
       gold_msi = FALSE,
