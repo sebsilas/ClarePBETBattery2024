@@ -8,11 +8,12 @@ run_battery(
   title = "Playing by Ear",
   app_name = "pbetsuzuki2024",
   instrument = c("Violin", "Cello"),
-  show_non_music_tests = TRUE
+  show_non_music_tests = TRUE,
+  max_goes = 3L
 )
 }
 \arguments{
-\item{show_non_music_tests}{}
+\item{max_goes}{}
 }
 \description{
 Run the Suzuki Battery

@@ -6,6 +6,7 @@
 #' @param app_name
 #' @param instrument
 #' @param show_non_music_tests
+#' @param max_goes
 #'
 #' @return
 #' @export
@@ -14,12 +15,13 @@
 run_battery <- function(title = "Playing by Ear",
                         app_name = 'pbetsuzuki2024',
                         instrument = c("Violin", "Cello"),
-                        show_non_music_tests = TRUE) {
+                        show_non_music_tests = TRUE,
+                        max_goes = 3L) {
 
   instrument <- match.arg(instrument)
 
   tl <- function() {
-    suzuki_tl(instrument = instrument, app_name = app_name, show_non_music_tests = show_non_music_tests)
+    suzuki_tl(instrument = instrument, app_name = app_name, show_non_music_tests = show_non_music_tests, max_goes = max_goes)
   }
 
   musicassessr::make_musicassessr_test(
@@ -49,7 +51,7 @@ run_battery <- function(title = "Playing by Ear",
 }
 
 
-suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello"), app_name, show_non_music_tests = TRUE) {
+suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello"), app_name, show_non_music_tests = TRUE, max_goes = 3L) {
 
   instrument <- match.arg(instrument)
 
@@ -60,7 +62,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
   audio_block <- psychTestR::join(
     psychTestR::one_button_page("Now you will play back some melodies as audio"),
-    suzuki_audio_block(stimuli, instrument)
+    suzuki_audio_block(stimuli, instrument, max_goes)
   )
 
   non_music_tests <- psychTestR::join(
@@ -143,7 +145,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
                        ),
       num_examples = PBET::no_examples(),
       skip_setup = TRUE, # this is done at the musicassessr_test level
-      max_goes = 1L,
+      max_goes = max_goes,
       melody_length = 3:15,
       default_range = musicassessr::set_default_range(instrument),
       gold_msi = FALSE,
@@ -153,7 +155,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
       asynchronous_api_mode = TRUE,
       get_answer_function_audio = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3,
       user_id = 60L, # Clare experiment user,
-      append_trial_block_after = audio_block,
+      append_trial_block_after = list(musicassessr::wrap_musicassessr_timeline(audio_block)),
       instrument_id = inst_id
     )
 
@@ -164,7 +166,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
 
 
-suzuki_audio_block <- function(selected_audio, instrument = c("Violin", "Cello")) {
+suzuki_audio_block <- function(selected_audio, instrument = c("Violin", "Cello"), max_goes = 3L) {
 
   instrument <- match.arg(instrument)
 
@@ -174,13 +176,20 @@ suzuki_audio_block <- function(selected_audio, instrument = c("Violin", "Cello")
                   directoryPath = system.file(file_path, package = 'ClarePBETBattery2024'))
 
 
-  purrr::pmap(selected_audio, iterate_row)
+  total_no_melodies <- nrow(selected_audio)
+
+  audio_block <- selected_audio %>%
+    dplyr::mutate(melody_no = dplyr::row_number() ) %>%
+    purrr::pmap(iterate_row, total_no_melodies = total_no_melodies, max_goes = max_goes) %>%
+    unlist() %>%
+    musicassessr::wrap_musicassessr_timeline(language = "en")
+
 }
 
 
 
 # Function to convert row to dataframe
-iterate_row <- function(..., instrument = c("Violin", "Viola", "Cello")) {
+iterate_row <- function(..., instrument = c("Violin", "Viola", "Cello"), total_no_melodies, max_goes = 3L) {
 
   instrument <- match.arg(instrument)
 
@@ -193,52 +202,93 @@ iterate_row <- function(..., instrument = c("Violin", "Viola", "Cello")) {
 
   audio_file_path <- paste0('audio/', audio_file)
 
-  psychTestR::reactive_page(function(state, ...) {
+  single_trial_page(tb_row, audio_file_path, audio_file, total_no_melodies, max_goes, attempts_left = 2L, melody_no = tb_row$melody_no)
 
-    db_vars <- if(psychTestR::get_global("musicassessr_db", state)) {
+}
 
-      list(
-        midi_vs_audio = "audio",
-        stimuli = tb_row$abs_melody,
-        stimuli_durations = tb_row$durations,
-        trial_time_started = Sys.time(),
-        instrument = psychTestR::get_global("inst", state),
-        attempt = 1L,
-        item_id = tb_row$item_id,
-        display_modality = "audio",
-        phase = "test",
-        rhythmic = TRUE,
-        session_id = musicassessr::get_promise_value(psychTestR::get_global("session_id", state)),
-        test_id = 2L, # PBET
-        review_items_id = NULL,
-        new_items_id = NULL
+
+single_trial_page <- function(tb_row, audio_file_path,
+                              audio_file, total_no_melodies, max_goes = 3L, attempts_left, melody_no) {
+
+  psychTestR::join(
+
+    psychTestR::code_block(function(state, ...) {
+
+      # Repeat melody logic stuff
+      psychTestR::set_global("user_satisfied", "Try Again", state)
+      psychTestR::set_global("number_attempts", 1, state)
+      psychTestR::set_global("max_goes", max_goes, state)
+      psychTestR::set_global("attempts_left", max_goes, state)
+
+    }),
+
+    # Keep in loop until the participant confirms they are happy with their entry
+    psychTestR::while_loop(test = function(state, ...) {
+      number_attempts <- psychTestR::get_global("number_attempts", state)
+      user_answer <- psychTestR::get_global("user_satisfied", state)
+      user_wants_to_play_again <- user_answer == "Try Again"
+    },
+    logic = list(
+
+      psychTestR::reactive_page(function(state, ...) {
+
+        db_vars <- if(psychTestR::get_global("musicassessr_db", state)) {
+
+          list(
+            midi_vs_audio = "audio",
+            stimuli = tb_row$abs_melody,
+            stimuli_durations = tb_row$durations,
+            trial_time_started = Sys.time(),
+            instrument = psychTestR::get_global("inst", state),
+            attempt = 1L,
+            item_id = tb_row$item_id,
+            display_modality = "audio",
+            phase = "test",
+            rhythmic = TRUE,
+            session_id = musicassessr::get_promise_value(psychTestR::get_global("session_id", state)),
+            test_id = 2L, # PBET
+            review_items_id = NULL,
+            new_items_id = NULL
+          )
+        } else NULL
+
+          # Grab various variables
+          number_attempts <- psychTestR::get_global("number_attempts", state)
+          max_goes <- psychTestR::get_global("max_goes", state)
+          attempts_left <- psychTestR::get_global("attempts_left", state) - 1L
+
+          musicassessr::present_stimuli(
+            stimuli = audio_file_path,
+            stimuli_type = "audio",
+            display_modality = "auditory",
+            page_title = "Play the melody by ear",
+            page_text = shiny::tags$div(
+              shiny::tags$p("Play the melody by ear then click Stop when you are finished."),
+              shiny::tags$p(tb_row$prompt)
+            ),
+            page_type = "record_audio_page",
+            get_answer = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3,
+            hideOnPlay = TRUE,
+            page_label = audio_file,
+            answer_meta_data = tb_row,
+            trigger_end_of_stimulus_fun = musicassessr::paradigm(paradigm_type = "call_and_response")$trigger_end_of_stimulus_fun,
+            db_vars = db_vars,
+            use_musicassessr_db = TRUE,
+            audio_playback_as_single_play_button = TRUE,
+            happy_with_response = TRUE,
+            attempts_left = attempts_left,
+            max_goes = max_goes,
+            total_no_melodies = total_no_melodies,
+            show_progress = TRUE,
+            melody_no = melody_no
+          )
+
+        }),
+
+      musicassessr::update_play_melody_loop_and_save(max_goes)
       )
-    } else NULL
-
-    musicassessr::present_stimuli(
-      stimuli = audio_file_path,
-      stimuli_type = "audio",
-      display_modality = "auditory",
-      page_title = "Play the melody by ear",
-      page_text = shiny::tags$div(
-                    shiny::tags$p("Play the melody by ear then click Stop when you are finished."),
-                    shiny::tags$p(tb_row$prompt)
-                    ),
-      page_type = "record_audio_page",
-      get_answer = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3,
-      hideOnPlay = TRUE,
-      page_label = audio_file,
-      answer_meta_data = tb_row,
-      trigger_end_of_stimulus_fun = musicassessr::paradigm(paradigm_type = "call_and_response")$trigger_end_of_stimulus_fun,
-      db_vars = db_vars,
-      use_musicassessr_db = TRUE,
-      audio_playback_as_single_play_button = TRUE
     )
-
-  })
-
-
-
+  )
 }
 
 
