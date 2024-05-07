@@ -139,7 +139,7 @@ custom_questions <- function() {
     psychTestR::NAFC_page(
       label = "kodaly_tuition",
       prompt = "I have had regular Kodaly music tuition:",
-      choices = agree_disagree
+      choices = c("1-6 months", "6-12 months", "1-2 years", "2-5 years", "5-10 years", "10+ years")
     ),
 
     psychTestR::dropdown_page(

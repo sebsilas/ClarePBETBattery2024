@@ -7,6 +7,7 @@
 #' @param instrument
 #' @param show_non_music_tests
 #' @param max_goes
+#' @param show_music_tests
 #'
 #' @return
 #' @export
@@ -16,12 +17,13 @@ run_battery <- function(title = "Playing by Ear",
                         app_name = 'pbetsuzuki2024',
                         instrument = c("Violin", "Cello"),
                         show_non_music_tests = TRUE,
-                        max_goes = 3L) {
+                        max_goes = 3L,
+                        show_music_tests = TRUE) {
 
   instrument <- match.arg(instrument)
 
   tl <- function() {
-    suzuki_tl(instrument = instrument, app_name = app_name, show_non_music_tests = show_non_music_tests, max_goes = max_goes)
+    suzuki_tl(instrument = instrument, app_name = app_name, show_non_music_tests = show_non_music_tests, max_goes = max_goes, show_music_tests = show_music_tests)
   }
 
   musicassessr::make_musicassessr_test(
@@ -38,6 +40,7 @@ run_battery <- function(title = "Playing by Ear",
                                          visual_notation = TRUE,
                                          app_name = app_name,
                                          musicassessr_aws = TRUE,
+                                         get_p_id = TRUE,
                                          use_musicassessr_db = FALSE, # Don't instantiate this here
                                          asynchronous_api_mode = TRUE,
                                          user_id = 60L, # Clare's user test ID
@@ -51,7 +54,7 @@ run_battery <- function(title = "Playing by Ear",
 }
 
 
-suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello"), app_name, show_non_music_tests = TRUE, max_goes = 3L) {
+suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello"), app_name, show_non_music_tests = TRUE, max_goes = 3L, show_music_tests = TRUE) {
 
   instrument <- match.arg(instrument)
 
@@ -69,7 +72,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
     # - demographics (age, gender, nationality, highest educational level obtained.
 
-    psyquest::DEG(),
+    psyquest::DEG(year_range = c(1930, 2024)),
 
 
     # - GMSI-musical training subscale
@@ -85,15 +88,12 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
     #
     # - JAJ (8 items)
 
-    JAJ::JAJ(num_items = 8L)
+    JAJ::JAJ(num_items = 8L, feedback = NULL)
 
   )
 
 
-  psychTestR::join(
-
-    if(show_non_music_tests) non_music_tests,
-
+  music_tests <- psychTestR::join(
     #  - SAA (5 rhythmic, 5 arhythmic items)
 
     psychTestR::one_button_page(
@@ -106,14 +106,16 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
 
     SAA::SAA(app_name = app_name,
+             rhythmic_item_bank = Berkowitz_easy,
+             max_goes = 1L,
              num_items = list(
-                              #long_tones = 6L,
-                              long_tones = 0L,
-                              arrhythmic = 0L,
-                              rhythmic = 5L),
+               #long_tones = 6L,
+               long_tones = 0L,
+               arrhythmic = 0L,
+               rhythmic = 5L),
              absolute_url = "https://musicassessr.com/suzuki-pbet-2024/",
              skip_setup = 'except_microphone',
-             experiment_id = 1L, # dev
+             experiment_id = 3L, # dev
              musicassessr_aws = TRUE,
              use_musicassessr_db = TRUE,
              demographics = FALSE,
@@ -121,7 +123,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
              asynchronous_api_mode = TRUE,
              user_id = 60L, # Clare experiment user
              get_answer_melodic = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3
-             ),
+    ),
 
 
     #   - PBE
@@ -131,18 +133,19 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
     #
 
 
-    # Just use PBET wrapper for instructions and setup, but append audio block at end?
+    # Just use PBET wrapper for instructions and setup, but append audio block at end
+
+    psychTestR::one_button_page("Now you will need your instrument. Please make sure your instrument is tuned to A=440 before you proceed."),
 
     PBET::PBET(
       app_name = app_name,
-      # experiment_id = 3L, # For Clare's exp
-      experiment_id = 1L, # For dev/testing
+      experiment_id = 3L, # For Clare's exp
       num_items = list(interval_perception = 0L,
                        find_this_note = 0L,
                        arrhythmic = 0L,
                        rhythmic = 0L, # We're only using for the instructions
                        wjd_audio = list(key_easy = 0L, key_hard = 0L)
-                       ),
+      ),
       num_examples = PBET::no_examples(),
       skip_setup = TRUE, # this is done at the musicassessr_test level
       max_goes = max_goes,
@@ -158,9 +161,18 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
       append_trial_block_after = list(musicassessr::wrap_musicassessr_timeline(audio_block)),
       instrument_id = inst_id
     )
+  )
+
+
+  psychTestR::join(
+
+    if(show_non_music_tests) non_music_tests,
+
+    if(show_music_tests) music_tests
 
     # Other PBET block..
-  ) %>% consentr::consent(need_age_consent = FALSE)
+  ) %>% consentr::consent(intro_debrief = system.file("extdata/intro_debrief.xlsx", package = "ClarePBETBattery2024"),
+                          need_age_consent = FALSE)
 
 }
 
@@ -292,3 +304,6 @@ single_trial_page <- function(tb_row, audio_file_path,
 }
 
 
+# gamifyr::scp_up("GDPR.pdf")
+# gamifyr::scp_up("InformationSheet.pdf")
+# gamifyr::scp_up("Debrief.pdf")

@@ -9,11 +9,12 @@ run_battery(
   app_name = "pbetsuzuki2024",
   instrument = c("Violin", "Cello"),
   show_non_music_tests = TRUE,
-  max_goes = 3L
+  max_goes = 3L,
+  show_music_tests = TRUE
 )
 }
 \arguments{
-\item{max_goes}{}
+\item{show_music_tests}{}
 }
 \description{
 Run the Suzuki Battery
