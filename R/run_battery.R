@@ -106,23 +106,23 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
     ),
 
 
-    # SAA::SAA(app_name = app_name,
-    #          rhythmic_item_bank = Berkowitz_easy,
-    #          max_goes = 1L,
-    #          num_items = list(
-    #            #long_tones = 6L,
-    #            long_tones = 0L,
-    #            arrhythmic = 0L,
-    #            rhythmic = 5L),
-    #          absolute_url = "https://musicassessr.com/suzuki-pbet-2024/",
-    #          skip_setup = 'except_microphone',
-    #          experiment_id = 3L, # Clare experiment ID
-    #          demographics = FALSE,
-    #          gold_msi = FALSE,
-    #          asynchronous_api_mode = TRUE,
-    #          user_id = 60L, # Clare experiment user
-    #          get_answer_melodic = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3
-    # ),
+    SAA::SAA(app_name = app_name,
+             rhythmic_item_bank = Berkowitz_easy,
+             max_goes = 1L,
+             num_items = list(
+               #long_tones = 6L,
+               long_tones = 0L,
+               arrhythmic = 0L,
+               rhythmic = 5L),
+             absolute_url = "https://musicassessr.com/suzuki-pbet-2024/",
+             skip_setup = 'except_microphone',
+             experiment_id = 3L, # Clare experiment ID
+             demographics = FALSE,
+             gold_msi = FALSE,
+             asynchronous_api_mode = TRUE,
+             user_id = 60L, # Clare experiment user
+             get_answer_melodic = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3
+    ),
 
 
     #   - PBE
