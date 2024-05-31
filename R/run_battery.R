@@ -106,23 +106,23 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
     ),
 
 
-    SAA::SAA(app_name = app_name,
-             rhythmic_item_bank = Berkowitz_easy,
-             max_goes = 1L,
-             num_items = list(
-               #long_tones = 6L,
-               long_tones = 0L,
-               arrhythmic = 0L,
-               rhythmic = 5L),
-             absolute_url = "https://musicassessr.com/suzuki-pbet-2024/",
-             skip_setup = 'except_microphone',
-             experiment_id = 3L, # Clare experiment ID
-             demographics = FALSE,
-             gold_msi = FALSE,
-             asynchronous_api_mode = TRUE,
-             user_id = 60L, # Clare experiment user
-             get_answer_melodic = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3
-    ),
+    # SAA::SAA(app_name = app_name,
+    #          rhythmic_item_bank = Berkowitz_easy,
+    #          max_goes = 1L,
+    #          num_items = list(
+    #            #long_tones = 6L,
+    #            long_tones = 0L,
+    #            arrhythmic = 0L,
+    #            rhythmic = 5L),
+    #          absolute_url = "https://musicassessr.com/suzuki-pbet-2024/",
+    #          skip_setup = 'except_microphone',
+    #          experiment_id = 3L, # Clare experiment ID
+    #          demographics = FALSE,
+    #          gold_msi = FALSE,
+    #          asynchronous_api_mode = TRUE,
+    #          user_id = 60L, # Clare experiment user
+    #          get_answer_melodic = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3
+    # ),
 
 
     #   - PBE
@@ -156,8 +156,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
       get_answer_function_audio = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3,
       user_id = 60L, # Clare experiment user,
       append_trial_block_after = list(musicassessr::wrap_musicassessr_timeline(audio_block)),
-      instrument_id = inst_id
-    )
+      instrument_id = inst_id)
   )
 
 
@@ -255,7 +254,7 @@ single_trial_page <- function(tb_row,
             stimuli_durations = tb_row$durations,
             trial_time_started = Sys.time(),
             instrument = psychTestR::get_global("inst", state),
-            attempt = 1L,
+            attempt = psychTestR::get_global('number_attempts', state),
             item_id = tb_row$item_id,
             display_modality = "audio",
             phase = "test",
@@ -279,6 +278,8 @@ single_trial_page <- function(tb_row,
             display_modality = "auditory",
             page_title = "Play the melody by ear",
             page_text = shiny::tags$div(
+              musicassessr::set_melodic_stimuli(itembankr::str_mel_to_vector(tb_row$abs_melody),
+                                                itembankr::str_mel_to_vector(tb_row$durations)),
               shiny::tags$p("Play the melody by ear then click Stop when you are finished."),
               shiny::tags$p(tb_row$prompt)
             ),
