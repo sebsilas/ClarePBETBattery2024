@@ -10,11 +10,12 @@ run_battery(
   instrument = c("Violin", "Cello"),
   show_non_music_tests = TRUE,
   max_goes = 3L,
-  show_music_tests = TRUE
+  show_music_tests = TRUE,
+  user_id = 1L
 )
 }
 \arguments{
-\item{show_music_tests}{}
+\item{user_id}{}
 }
 \description{
 Run the Suzuki Battery

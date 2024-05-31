@@ -8,6 +8,7 @@
 #' @param show_non_music_tests
 #' @param max_goes
 #' @param show_music_tests
+#' @param user_id
 #'
 #' @return
 #' @export
@@ -18,12 +19,13 @@ run_battery <- function(title = "Playing by Ear",
                         instrument = c("Violin", "Cello"),
                         show_non_music_tests = TRUE,
                         max_goes = 3L,
-                        show_music_tests = TRUE) {
+                        show_music_tests = TRUE,
+                        user_id = 1L) {
 
   instrument <- match.arg(instrument)
 
   tl <- function() {
-    suzuki_tl(instrument = instrument, app_name = app_name, show_non_music_tests = show_non_music_tests, max_goes = max_goes, show_music_tests = show_music_tests)
+    suzuki_tl(instrument = instrument, app_name = app_name, show_non_music_tests = show_non_music_tests, max_goes = max_goes, show_music_tests = show_music_tests, user_id = user_id)
   }
 
   musicassessr::make_musicassessr_test(
@@ -39,10 +41,9 @@ run_battery <- function(title = "Playing by Ear",
     opt = musicassessr::musicassessr_opt(setup_pages = FALSE,
                                          visual_notation = TRUE,
                                          app_name = app_name,
-                                         musicassessr_aws = TRUE,
                                          get_p_id = TRUE,
-                                         use_musicassessr_db = FALSE, # Don't instantiate this here
                                          asynchronous_api_mode = TRUE,
+                                         experiment_id = 1L,
                                          user_id = 60L, # Clare's user test ID
                                          css = "https://musicassessr.com/assets/css/style_songbird.css"),
 
@@ -54,7 +55,7 @@ run_battery <- function(title = "Playing by Ear",
 }
 
 
-suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello"), app_name, show_non_music_tests = TRUE, max_goes = 3L, show_music_tests = TRUE) {
+suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello"), app_name, show_non_music_tests = TRUE, max_goes = 3L, show_music_tests = TRUE, user_id) {
 
   instrument <- match.arg(instrument)
 
@@ -65,7 +66,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
   audio_block <- psychTestR::join(
     psychTestR::one_button_page("Now you will play back some melodies as audio"),
-    suzuki_audio_block(stimuli, instrument, max_goes)
+    suzuki_audio_block(stimuli, instrument, max_goes, user_id)
   )
 
   non_music_tests <- psychTestR::join(
@@ -115,9 +116,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
                rhythmic = 5L),
              absolute_url = "https://musicassessr.com/suzuki-pbet-2024/",
              skip_setup = 'except_microphone',
-             experiment_id = 3L, # dev
-             musicassessr_aws = TRUE,
-             use_musicassessr_db = TRUE,
+             experiment_id = 3L, # Clare experiment ID
              demographics = FALSE,
              gold_msi = FALSE,
              asynchronous_api_mode = TRUE,
@@ -153,8 +152,6 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
       default_range = musicassessr::set_default_range(instrument),
       gold_msi = FALSE,
       demographics = FALSE,
-      musicassessr_aws = TRUE,
-      use_musicassessr_db = TRUE,
       asynchronous_api_mode = TRUE,
       get_answer_function_audio = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3,
       user_id = 60L, # Clare experiment user,
@@ -178,7 +175,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
 
 
-suzuki_audio_block <- function(selected_audio, instrument = c("Violin", "Cello"), max_goes = 3L) {
+suzuki_audio_block <- function(selected_audio, instrument = c("Violin", "Cello"), max_goes = 3L, user_id) {
 
   instrument <- match.arg(instrument)
 
@@ -192,7 +189,7 @@ suzuki_audio_block <- function(selected_audio, instrument = c("Violin", "Cello")
 
   audio_block <- selected_audio %>%
     dplyr::mutate(melody_no = dplyr::row_number() ) %>%
-    purrr::pmap(iterate_row, total_no_melodies = total_no_melodies, max_goes = max_goes) %>%
+    purrr::pmap(iterate_row, total_no_melodies = total_no_melodies, max_goes = max_goes, user_id = user_id) %>%
     unlist() %>%
     musicassessr::wrap_musicassessr_timeline(language = "en")
 
@@ -201,7 +198,7 @@ suzuki_audio_block <- function(selected_audio, instrument = c("Violin", "Cello")
 
 
 # Function to convert row to dataframe
-iterate_row <- function(..., instrument = c("Violin", "Viola", "Cello"), total_no_melodies, max_goes = 3L) {
+iterate_row <- function(..., instrument = c("Violin", "Viola", "Cello"), total_no_melodies, max_goes = 3L, user_id) {
 
   instrument <- match.arg(instrument)
 
@@ -214,13 +211,19 @@ iterate_row <- function(..., instrument = c("Violin", "Viola", "Cello"), total_n
 
   audio_file_path <- paste0('audio/', audio_file)
 
-  single_trial_page(tb_row, audio_file_path, audio_file, total_no_melodies, max_goes, attempts_left = 2L, melody_no = tb_row$melody_no)
+  single_trial_page(tb_row, audio_file_path, audio_file, total_no_melodies, max_goes, attempts_left = 2L, melody_no = tb_row$melody_no, user_id = user_id)
 
 }
 
 
-single_trial_page <- function(tb_row, audio_file_path,
-                              audio_file, total_no_melodies, max_goes = 3L, attempts_left, melody_no) {
+single_trial_page <- function(tb_row,
+                              audio_file_path,
+                              audio_file,
+                              total_no_melodies,
+                              max_goes = 3L,
+                              attempts_left,
+                              melody_no,
+                              user_id) {
 
   psychTestR::join(
 
@@ -244,7 +247,7 @@ single_trial_page <- function(tb_row, audio_file_path,
 
       psychTestR::reactive_page(function(state, ...) {
 
-        db_vars <- if(psychTestR::get_global("musicassessr_db", state)) {
+        db_vars <- if(psychTestR::get_global("asynchronous_api_mode", state)) {
 
           list(
             midi_vs_audio = "audio",
@@ -260,7 +263,8 @@ single_trial_page <- function(tb_row, audio_file_path,
             session_id = musicassessr::get_promise_value(psychTestR::get_global("session_id", state)),
             test_id = 2L, # PBET
             review_items_id = NULL,
-            new_items_id = NULL
+            new_items_id = NULL,
+            user_id = user_id
           )
         } else NULL
 
@@ -285,7 +289,6 @@ single_trial_page <- function(tb_row, audio_file_path,
             answer_meta_data = tb_row,
             trigger_end_of_stimulus_fun = musicassessr::paradigm(paradigm_type = "call_and_response")$trigger_end_of_stimulus_fun,
             db_vars = db_vars,
-            use_musicassessr_db = TRUE,
             audio_playback_as_single_play_button = TRUE,
             happy_with_response = TRUE,
             attempts_left = attempts_left,

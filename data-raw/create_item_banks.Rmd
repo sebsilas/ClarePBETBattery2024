@@ -187,7 +187,7 @@ We get the phrase and ngram sets separately so we can join the items on
 
 ```{r}
 
-suzuki_phrase <- readxl::read_excel('Berk Final Vn Vla Cello 11April.xlsx') %>% 
+suzuki_phrase <- readxl::read_excel('Berk fixed typos 29 May.xlsx') %>% 
   dplyr::filter(grepl("phrase", item_id)) %>% 
   dplyr::left_join(suzuki_item_bank_phrase, by = "item_id") 
 
@@ -197,7 +197,7 @@ suzuki_phrase <- readxl::read_excel('Berk Final Vn Vla Cello 11April.xlsx') %>%
 
 ```{r}
 
-suzuki_ngram <- readxl::read_excel('Berk Final Vn Vla Cello 11April.xlsx') %>% 
+suzuki_ngram <- readxl::read_excel('Berk fixed typos 29 May.xlsx') %>% 
   filter(grepl("ngram", item_id)) %>% 
   left_join(suzuki_item_bank_ngram, by = "item_id") 
 
