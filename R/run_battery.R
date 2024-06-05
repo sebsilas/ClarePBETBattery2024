@@ -30,7 +30,7 @@ run_battery <- function(title = "Playing by Ear",
 
   musicassessr::make_musicassessr_test(
 
-    welcome_page = musicassessr::empty_code_block(),
+    welcome_page = psychTestR::one_button_page("Welcome to the study!"),
 
     title = title,
 
@@ -45,6 +45,7 @@ run_battery <- function(title = "Playing by Ear",
                                          asynchronous_api_mode = TRUE,
                                          experiment_id = 1L,
                                          user_id = 60L, # Clare's user test ID
+                                         username = "there",
                                          css = "https://musicassessr.com/assets/css/style_songbird.css"),
 
     final_page = psychTestR::final_page("Thank you for taking part in the test!")
@@ -69,6 +70,19 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
     suzuki_audio_block(stimuli, instrument, max_goes, user_id)
   )
 
+  custom_pbet_instructions <- function() {
+
+    psychTestR::join(
+
+      psychTestR::one_button_page("You are going to hear 12 melodies to play on your instrument. They are different lengths and present different challenges, but they should all be in keys that feel familiar."),
+
+      psychTestR::one_button_page("You can have up to 3 tries on each melody. Aim to get the pitch and rhythm as accurate as possible. If it sounds tricky just have a go!"),
+
+      psychTestR::one_button_page("Play with minimal vibrato, clear articulation and separate bows - the note detection procedure will work best this way, so it is not necessary to copy the bowing and articulation that you hear on the recordings.")
+
+    )
+  }
+
   non_music_tests <- psychTestR::join(
 
     # - demographics (age, gender, nationality, highest educational level obtained.
@@ -80,11 +94,12 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
     psyquest::GMS(subscales = "Musical Training"),
 
+    custom_questions(),
+
+
     # - Concurrent musical activities
 
     psyquest::CCM(),
-
-    custom_questions(),
 
     #
     # - JAJ (8 items)
@@ -95,26 +110,17 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
 
   music_tests <- psychTestR::join(
+
     #  - SAA (5 rhythmic, 5 arhythmic items)
-
-    psychTestR::one_button_page(
-      shiny::tags$div(
-        shiny::tags$link(rel="stylesheet", type="text/css", href="https://musicassessr.com/assets/css/style_songbird.css"),
-        shiny::tags$script("var upload_to_s3 = true; console.log('Turning S3 mode on');"),
-        shiny::tags$p(paste0("Let's proceed!"))
-      )
-    ),
-
 
     SAA::SAA(app_name = app_name,
              rhythmic_item_bank = Berkowitz_easy,
              max_goes = 1L,
              num_items = list(
-               #long_tones = 6L,
                long_tones = 0L,
                arrhythmic = 0L,
                rhythmic = 5L),
-             absolute_url = "https://musicassessr.com/suzuki-pbet-2024/",
+             absolute_url = "https://musicassessr.com/pbet-strings-2024/",
              skip_setup = 'except_microphone',
              experiment_id = 3L, # Clare experiment ID
              demographics = FALSE,
@@ -145,6 +151,8 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
                        rhythmic = 0L, # We're only using for the instructions
                        wjd_audio = list(key_easy = 0L, key_hard = 0L)
       ),
+      show_instructions = FALSE,
+      append_block_before = custom_pbet_instructions(),
       num_examples = PBET::no_examples(),
       skip_setup = TRUE, # this is done at the musicassessr_test level
       max_goes = max_goes,
@@ -162,16 +170,27 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
   psychTestR::join(
 
+    consent_block[1:15],
+
     if(show_non_music_tests) non_music_tests,
 
-    if(show_music_tests) music_tests
+    if(show_music_tests) music_tests,
 
-    # Other PBET block..
-  ) %>% consentr::consent(intro_debrief = system.file("extdata/intro_debrief.xlsx", package = "ClarePBETBattery2024"),
-                          need_age_consent = FALSE)
+    psychTestR::text_input_page(label = "participant_feedback",
+                                prompt = "Thank you for your help in this study. If you would like to give us any feedback at all please do so here. It would be interesting to know anything you’d like to share with us.",
+                                one_line = FALSE
+                                ),
+
+    consent_block[[16]]
+
+  )
 
 }
 
+
+consent_block <- consentr::consent(musicassessr::empty_code_block(),
+                   intro_debrief = system.file("extdata/intro_debrief.xlsx", package = "ClarePBETBattery2024"),
+                   need_age_consent = FALSE)
 
 
 suzuki_audio_block <- function(selected_audio, instrument = c("Violin", "Cello"), max_goes = 3L, user_id) {
