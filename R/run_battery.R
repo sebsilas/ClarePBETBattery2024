@@ -90,20 +90,20 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
     psychTestR::one_button_page(shiny::tags$div(
                                 shiny::tags$p("Thank you for this information."),
-                                shiny::tags$p("Next there are 3 sections where we will ask about you and your musical activities")
+                                shiny::tags$p("Next there are 3 sections where we will ask about you and your musical activities.")
                                 )),
 
     # - GMSI-musical training subscale
 
-    psychTestR::one_button_page("Here is the first section of questions, where there will be 7 questions"),
+    psychTestR::one_button_page("Here is the first section of questions, where there will be 7 questions."),
 
     psyquest::GMS(subscales = "Musical Training"),
 
-    psychTestR::one_button_page("Next is the second section of questions, where there will be 14 questions"),
+    psychTestR::one_button_page("Next is the second section of questions, where there will be 14 questions."),
 
     custom_questions(),
 
-    psychTestR::one_button_page("Here is the last section of questions, where there will be 5 questions"),
+    psychTestR::one_button_page("Here is the last section of questions, where there will be 5 questions."),
 
 
     # - Concurrent musical activities
