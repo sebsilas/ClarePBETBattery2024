@@ -187,7 +187,7 @@ We get the phrase and ngram sets separately so we can join the items on
 
 ```{r}
 
-suzuki_phrase <- readxl::read_excel('Berk fixed typos 29 May.xlsx') %>% 
+suzuki_phrase <- readxl::read_excel('Berk fixed typos 6 June.xlsx') %>% 
   dplyr::filter(grepl("phrase", item_id)) %>% 
   dplyr::left_join(suzuki_item_bank_phrase, by = "item_id") 
 
@@ -197,7 +197,7 @@ suzuki_phrase <- readxl::read_excel('Berk fixed typos 29 May.xlsx') %>%
 
 ```{r}
 
-suzuki_ngram <- readxl::read_excel('Berk fixed typos 29 May.xlsx') %>% 
+suzuki_ngram <- readxl::read_excel('Berk fixed typos 6 June.xlsx') %>% 
   filter(grepl("ngram", item_id)) %>% 
   left_join(suzuki_item_bank_ngram, by = "item_id") 
 
@@ -232,7 +232,10 @@ phrase_arrhythmic_difficulty <- predict(Berkowitz::lm2.2,
 
 phrase_rhythmic_difficulty <- predict(Berkowitz::lm3.2,
                                  newdata = suzuki_selected_item_bank %>% mutate(log_freq = 0),
-                                 re.form = NA)
+                                 re.form = NA) %>% # this instructs the model to predict without random effects )
+                      as.numeric %>%
+                      magrittr::multiply_by(-1) %>%
+                      scales::rescale()
 
 
 suzuki_selected_item_bank <- suzuki_selected_item_bank %>% 

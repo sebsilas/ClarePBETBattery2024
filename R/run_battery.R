@@ -66,7 +66,6 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
 
   audio_block <- psychTestR::join(
-    psychTestR::one_button_page("Now you will play back some melodies as audio"),
     suzuki_audio_block(stimuli, instrument, max_goes, user_id)
   )
 
@@ -74,9 +73,9 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
     psychTestR::join(
 
-      psychTestR::one_button_page("You are going to hear 12 melodies to play on your instrument. They are different lengths and present different challenges, but they should all be in keys that feel familiar."),
+      psychTestR::one_button_page(shiny::tags$div(shiny::tags$p("You are going to hear 12 melodies to play on your instrument."), shiny::tags$p("They are different lengths and present different challenges, but they should all be in keys that feel familiar."))),
 
-      psychTestR::one_button_page("You can have up to 3 tries on each melody. Aim to get the pitch and rhythm as accurate as possible. If it sounds tricky just have a go!"),
+      psychTestR::one_button_page(shiny::tags$div(shiny::tags$p("You can have up to 3 tries on each melody. Aim to get the pitch and rhythm as accurate as possible."), shiny::tags$p("If it sounds tricky just have a go!"))),
 
       psychTestR::one_button_page("Play with minimal vibrato, clear articulation and separate bows - the note detection procedure will work best this way, so it is not necessary to copy the bowing and articulation that you hear on the recordings.")
 
@@ -89,19 +88,30 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
     psyquest::DEG(year_range = c(1930, 2024)),
 
+    psychTestR::one_button_page(shiny::tags$div(
+                                shiny::tags$p("Thank you for this information."),
+                                shiny::tags$p("Next there are 3 sections where we will ask about you and your musical activities")
+                                )),
 
     # - GMSI-musical training subscale
 
+    psychTestR::one_button_page("Here is the first section of questions, where there will be 7 questions"),
+
     psyquest::GMS(subscales = "Musical Training"),
 
+    psychTestR::one_button_page("Next is the second section of questions, where there will be 14 questions"),
+
     custom_questions(),
+
+    psychTestR::one_button_page("Here is the last section of questions, where there will be 5 questions"),
 
 
     # - Concurrent musical activities
 
     psyquest::CCM(),
 
-    #
+    psychTestR::one_button_page("Now, there will be a game where you remember where some balls are."),
+
     # - JAJ (8 items)
 
     JAJ::JAJ(num_items = 8L, feedback = NULL)
@@ -142,6 +152,17 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
     psychTestR::one_button_page("Now you will need your instrument. Please make sure your instrument is tuned to A=440 before you proceed."),
 
+    psychTestR::one_button_page(body = shiny::tags$div(shiny::tags$h2("Welcome to the Play By Ear game!"),
+                                                       shiny::tags$img(src = 'https://adaptiveeartraining.com/assets/img/music.png', height = 100, width = 100),
+                                                       shiny::tags$img(src = 'https://adaptiveeartraining.com/assets/img/saxophone.png', height = 100, width = 100)
+    )),
+
+    psychTestR::one_button_page("You are going to hear 12 melodies to play on your instrument. They are different lengths and present different challenges, but they should all be in keys that feel familiar."),
+
+    psychTestR::one_button_page("You can have up to 3 tries on each melody. Aim to get the pitch and rhythm as accurate as possible. If it sounds tricky just have a go!"),
+
+    psychTestR::one_button_page("Play with minimal vibrato, clear articulation and separate bows - the note detection procedure will work best this way, so it is not necessary to copy the bowing and articulation that you hear on the recordings"),
+
     PBET::PBET(
       app_name = app_name,
       experiment_id = 3L, # For Clare's exp
@@ -152,6 +173,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
                        wjd_audio = list(key_easy = 0L, key_hard = 0L)
       ),
       show_instructions = FALSE,
+      show_introduction = FALSE,
       append_block_before = custom_pbet_instructions(),
       num_examples = PBET::no_examples(),
       skip_setup = TRUE, # this is done at the musicassessr_test level
@@ -164,7 +186,9 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
       get_answer_function_audio = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3,
       user_id = 60L, # Clare experiment user,
       append_trial_block_after = list(musicassessr::wrap_musicassessr_timeline(audio_block)),
-      instrument_id = inst_id)
+      instrument_id = inst_id,
+      present_continue_to_new_test_page = FALSE
+      )
   )
 
 
