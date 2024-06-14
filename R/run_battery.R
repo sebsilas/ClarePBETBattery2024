@@ -16,7 +16,7 @@
 #' @examples
 run_battery <- function(title = "Playing by Ear",
                         app_name = 'pbetsuzuki2024',
-                        instrument = c("Violin", "Cello"),
+                        instrument = c("Violin", "Cello", "Viola"),
                         show_non_music_tests = TRUE,
                         max_goes = 3L,
                         show_music_tests = TRUE,
@@ -90,7 +90,8 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
     psychTestR::one_button_page(shiny::tags$div(
                                 shiny::tags$p("Thank you for this information."),
-                                shiny::tags$p("Next there are 3 sections where we will ask about you and your musical activities.")
+                                shiny::tags$p("Next there are 3 sections where we will ask about you and your musical activities."),
+                                shiny::tags$p("N.B: Depending on your answer(s), some questions may be skipped")
                                 )),
 
     # - GMSI-musical training subscale
@@ -110,8 +111,6 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
     psyquest::CCM(),
 
-    psychTestR::one_button_page("Now, there will be a game where you remember where some balls are."),
-
     # - JAJ (8 items)
 
     JAJ::JAJ(num_items = 8L, feedback = NULL)
@@ -123,22 +122,22 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
     #  - SAA (5 rhythmic, 5 arhythmic items)
 
-    SAA::SAA(app_name = app_name,
-             rhythmic_item_bank = Berkowitz_easy,
-             max_goes = 1L,
-             num_items = list(
-               long_tones = 0L,
-               arrhythmic = 0L,
-               rhythmic = 5L),
-             absolute_url = "https://musicassessr.com/pbet-strings-2024/",
-             skip_setup = 'except_microphone',
-             experiment_id = 3L, # Clare experiment ID
-             demographics = FALSE,
-             gold_msi = FALSE,
-             asynchronous_api_mode = TRUE,
-             user_id = 60L, # Clare experiment user
-             get_answer_melodic = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3
-    ),
+    # SAA::SAA(app_name = app_name,
+    #          rhythmic_item_bank = Berkowitz_easy,
+    #          max_goes = 1L,
+    #          num_items = list(
+    #            long_tones = 0L,
+    #            arrhythmic = 0L,
+    #            rhythmic = 5L),
+    #          absolute_url = "https://musicassessr.com/pbet-strings-2024/",
+    #          skip_setup = 'except_microphone',
+    #          experiment_id = 3L, # Clare experiment ID
+    #          demographics = FALSE,
+    #          gold_msi = FALSE,
+    #          asynchronous_api_mode = TRUE,
+    #          user_id = 60L, # Clare experiment user
+    #          get_answer_melodic = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3
+    # ),
 
 
     #   - PBE
@@ -217,11 +216,11 @@ consent_block <- consentr::consent(musicassessr::empty_code_block(),
                    need_age_consent = FALSE)
 
 
-suzuki_audio_block <- function(selected_audio, instrument = c("Violin", "Cello"), max_goes = 3L, user_id) {
+suzuki_audio_block <- function(selected_audio, instrument = c("Violin", "Cello", "Viola"), max_goes = 3L, user_id) {
 
   instrument <- match.arg(instrument)
 
-  file_path <- if(instrument == "Violin") 'Berk_Cut_melodies_violin_noclick' else if(instrument == "Cello") "Berk_Cut_melodies_cello_noclick" else stop ("Not valid instrument")
+  file_path <- if(instrument == "Violin") 'Berk_Cut_melodies_violin_noclick' else if(instrument == "Cello") "Berk_Cut_melodies_cello_noclick" else if (instrument == "Viola") "Berk_Cut_melodies_viola_noclick" else stop ("Not valid instrument")
 
   shiny::addResourcePath(prefix = 'audio',
                   directoryPath = system.file(file_path, package = 'ClarePBETBattery2024'))
@@ -249,9 +248,18 @@ iterate_row <- function(..., instrument = c("Violin", "Viola", "Cello"), total_n
 
   if(instrument == "Violin") {
     audio_file <- tb_row$`Violin Audio File name`
+  } else if (instrument == "Viola") {
+    audio_file <- tb_row$`Viola Audio File Name`
+  } else if (instrument == "Cello") (
+    audio_file <- tb_row$`Cello Audio File Name`
+  ) else {
+    stop("Not a valid instrument")
   }
 
+
   audio_file_path <- paste0('audio/', audio_file)
+
+  print(audio_file_path)
 
   single_trial_page(tb_row, audio_file_path, audio_file, total_no_melodies, max_goes, attempts_left = 2L, melody_no = tb_row$melody_no, user_id = user_id)
 

@@ -13,7 +13,7 @@
 #' @examples
 get_items <- function(num_items = 12,
                        melody_length = 3:15,
-                       instrument = c("Violin", "Cello") ) {
+                       instrument = c("Violin", "Cello", "Viola") ) {
 
   instrument <- match.arg(instrument)
 
@@ -30,6 +30,11 @@ get_items <- function(num_items = 12,
 
     item_bank <- ClarePBETBattery2024::suzuki_selected_item_bank_cello
     file_path <- "Berk_Cut_melodies_cello_noclick"
+
+  } else if (instrument == "Viola")  {
+
+    item_bank <- ClarePBETBattery2024::suzuki_selected_item_bank_viola
+    file_path <- "Berk_Cut_melodies_viola_noclick"
 
   } else {
     stop("Not valid instrument")
