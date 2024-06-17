@@ -7,7 +7,7 @@
 get_items(
   num_items = 12,
   melody_length = 3:15,
-  instrument = c("Violin", "Cello")
+  instrument = c("Violin", "Cello", "Viola")
 )
 }
 \arguments{

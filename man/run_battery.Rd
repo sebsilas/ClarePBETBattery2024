@@ -7,7 +7,7 @@
 run_battery(
   title = "Playing by Ear",
   app_name = "pbetsuzuki2024",
-  instrument = c("Violin", "Cello"),
+  instrument = c("Violin", "Cello", "Viola"),
   show_non_music_tests = TRUE,
   max_goes = 3L,
   show_music_tests = TRUE,

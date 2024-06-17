@@ -42,6 +42,11 @@ run_battery <- function(title = "Playing by Ear",
                                          visual_notation = TRUE,
                                          app_name = app_name,
                                          get_p_id = TRUE,
+                                         get_pid_prompt = shiny::tags$div(shiny::tags$p(
+                                           "Enter your unique ID. This is the ID you created when you registered."
+                                           ),
+                                           shiny::tags$p("It is probably the first two letters of your first name plus, in numbers, your month and year of birth. Please check with your parent/guardian if you don't remember!")
+                                           ),
                                          asynchronous_api_mode = TRUE,
                                          experiment_id = 1L,
                                          user_id = 60L, # Clare's user test ID
