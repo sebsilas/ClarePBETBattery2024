@@ -12,11 +12,12 @@ run_battery(
   max_goes = 3L,
   show_music_tests = TRUE,
   user_id = 1L,
-  show_saa = TRUE
+  show_saa = TRUE,
+  show_pbet = TRUE
 )
 }
 \arguments{
-\item{show_saa}{}
+\item{show_pbet}{}
 }
 \description{
 Run the Suzuki Battery

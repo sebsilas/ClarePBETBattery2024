@@ -10,6 +10,7 @@
 #' @param show_music_tests
 #' @param user_id
 #' @param show_saa
+#' @param show_pbet
 #'
 #' @return
 #' @export
@@ -22,12 +23,13 @@ run_battery <- function(title = "Playing by Ear",
                         max_goes = 3L,
                         show_music_tests = TRUE,
                         user_id = 1L,
-                        show_saa = TRUE) {
+                        show_saa = TRUE,
+                        show_pbet = TRUE) {
 
   instrument <- match.arg(instrument)
 
   tl <- function() {
-    suzuki_tl(instrument = instrument, app_name = app_name, show_non_music_tests = show_non_music_tests, max_goes = max_goes, show_music_tests = show_music_tests, user_id = user_id, show_saa = show_saa)
+    suzuki_tl(instrument = instrument, app_name = app_name, show_non_music_tests = show_non_music_tests, max_goes = max_goes, show_music_tests = show_music_tests, user_id = user_id, show_saa = show_saa, show_pbet = show_pbet)
   }
 
   musicassessr::make_musicassessr_test(
@@ -63,7 +65,15 @@ run_battery <- function(title = "Playing by Ear",
 }
 
 
-suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello"), app_name, show_non_music_tests = TRUE, max_goes = 3L, show_music_tests = TRUE, user_id, show_saa = TRUE) {
+suzuki_tl <- function(num_items = 24,
+                      instrument = c("Violin", "Viola", "Cello"),
+                      app_name,
+                      show_non_music_tests = TRUE,
+                      max_goes = 3L,
+                      show_music_tests = TRUE,
+                      user_id,
+                      show_saa = TRUE,
+                      show_pbet = TRUE) {
 
   instrument <- match.arg(instrument)
 
@@ -170,7 +180,8 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
     psychTestR::one_button_page("Play with minimal vibrato, clear articulation and separate bows - the note detection procedure will work best this way, so it is not necessary to copy the bowing and articulation that you hear on the recordings"),
 
-    PBET::PBET(
+    if(show_pbet){
+      PBET::PBET(
       app_name = app_name,
       experiment_id = 3L, # For Clare's exp
       num_items = list(interval_perception = 0L,
@@ -196,6 +207,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
       instrument_id = inst_id,
       present_continue_to_new_test_page = FALSE
       )
+    }
   )
 
 
