@@ -9,6 +9,7 @@
 #' @param max_goes
 #' @param show_music_tests
 #' @param user_id
+#' @param show_saa
 #'
 #' @return
 #' @export
@@ -20,12 +21,13 @@ run_battery <- function(title = "Playing by Ear",
                         show_non_music_tests = TRUE,
                         max_goes = 3L,
                         show_music_tests = TRUE,
-                        user_id = 1L) {
+                        user_id = 1L,
+                        show_saa = TRUE) {
 
   instrument <- match.arg(instrument)
 
   tl <- function() {
-    suzuki_tl(instrument = instrument, app_name = app_name, show_non_music_tests = show_non_music_tests, max_goes = max_goes, show_music_tests = show_music_tests, user_id = user_id)
+    suzuki_tl(instrument = instrument, app_name = app_name, show_non_music_tests = show_non_music_tests, max_goes = max_goes, show_music_tests = show_music_tests, user_id = user_id, show_saa = show_saa)
   }
 
   musicassessr::make_musicassessr_test(
@@ -61,7 +63,7 @@ run_battery <- function(title = "Playing by Ear",
 }
 
 
-suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello"), app_name, show_non_music_tests = TRUE, max_goes = 3L, show_music_tests = TRUE, user_id) {
+suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello"), app_name, show_non_music_tests = TRUE, max_goes = 3L, show_music_tests = TRUE, user_id, show_saa = TRUE) {
 
   instrument <- match.arg(instrument)
 
@@ -127,7 +129,8 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
 
     #  - SAA (5 rhythmic, 5 arhythmic items)
 
-    SAA::SAA(app_name = app_name,
+    if(show_saa){
+      SAA::SAA(app_name = app_name,
              rhythmic_item_bank = Berkowitz_easy,
              max_goes = 1L,
              num_items = list(
@@ -142,7 +145,7 @@ suzuki_tl <- function(num_items = 24, instrument = c("Violin", "Viola", "Cello")
              asynchronous_api_mode = TRUE,
              user_id = 60L, # Clare experiment user
              get_answer_melodic = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3
-    ),
+    )},
 
 
     #   - PBE
