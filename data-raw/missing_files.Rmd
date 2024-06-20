@@ -1,0 +1,42 @@
+
+
+```{r}
+
+library(tidyverse)
+
+```
+
+
+```{r}
+
+file_list <- c(suzuki_selected_item_bank_cello$`Cello Audio File Name`,
+               suzuki_selected_item_bank_viola$`Viola Audio File Name`,
+               suzuki_selected_item_bank_violin$`Violin Audio File name`)
+
+
+```
+
+
+```{r}
+
+mp3_file_list <- c(
+                  list.files('~/ClarePBETBattery2024/inst/Berk_Cut_melodies_cello_noclick', 
+                              pattern = "\\.mp3$"),
+                  
+                  list.files('~/ClarePBETBattery2024/inst/Berk_Cut_melodies_viola_noclick', 
+                              pattern = "\\.mp3$"),
+                  
+                  list.files('~/ClarePBETBattery2024/inst/Berk_Cut_melodies_violin_noclick', 
+                              pattern = "\\.mp3$")
+                  )
+                   
+                   
+
+```
+
+
+```{r}
+
+setdiff(file_list, mp3_file_list)
+
+```

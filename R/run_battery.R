@@ -334,7 +334,9 @@ single_trial_page <- function(tb_row,
             test_id = 2L, # PBET
             review_items_id = NULL,
             new_items_id = NULL,
-            user_id = user_id
+            user_id = user_id,
+            feedback = FALSE,
+            feedback_type = NA
           )
         } else NULL
 
