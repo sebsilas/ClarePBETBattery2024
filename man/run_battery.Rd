@@ -11,7 +11,7 @@ run_battery(
   show_non_music_tests = TRUE,
   max_goes = 3L,
   show_music_tests = TRUE,
-  user_id = 1L,
+  user_id = 88L,
   show_saa = TRUE,
   show_pbet = TRUE
 )

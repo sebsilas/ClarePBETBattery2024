@@ -22,7 +22,7 @@ run_battery <- function(title = "Playing by Ear",
                         show_non_music_tests = TRUE,
                         max_goes = 3L,
                         show_music_tests = TRUE,
-                        user_id = 1L,
+                        user_id = 88L,
                         show_saa = TRUE,
                         show_pbet = TRUE) {
 
@@ -52,10 +52,11 @@ run_battery <- function(title = "Playing by Ear",
                                            shiny::tags$p("It is probably the first two letters of your first name plus, in numbers, your month and year of birth. Please check with your parent/guardian if you don't remember!")
                                            ),
                                          asynchronous_api_mode = TRUE,
-                                         experiment_id = 1L,
-                                         user_id = 60L, # Clare's user test ID
+                                         experiment_id = 3L,
+                                         user_id = 88L, # Clare's user test ID
                                          username = "there",
-                                         css = "https://musicassessr.com/assets/css/style_songbird.css"),
+                                         css = c("https://musicassessr.com/assets/css/style_songbird.css",
+                                                 system.file('www/css/musicassessr.css', package = 'musicassessr'))),
 
     final_page = psychTestR::final_page("Thank you for taking part in the test!")
 
@@ -153,7 +154,7 @@ suzuki_tl <- function(num_items = 24,
              demographics = FALSE,
              gold_msi = FALSE,
              asynchronous_api_mode = TRUE,
-             user_id = 60L, # Clare experiment user
+             user_id = 88L, # Clare experiment user
              get_answer_melodic = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3
     )},
 
@@ -202,7 +203,7 @@ suzuki_tl <- function(num_items = 24,
       demographics = FALSE,
       asynchronous_api_mode = TRUE,
       get_answer_function_audio = musicassessr::get_answer_add_trial_and_compute_trial_scores_s3,
-      user_id = 60L, # Clare experiment user,
+      user_id = 88L, # Clare experiment user,
       append_trial_block_after = list(musicassessr::wrap_musicassessr_timeline(audio_block)),
       instrument_id = inst_id,
       present_continue_to_new_test_page = FALSE
