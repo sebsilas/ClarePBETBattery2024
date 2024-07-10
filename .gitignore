@@ -7,3 +7,5 @@
 test_apps
 data-raw/Berk_Cut_melodies_violin_noclick
 output
+node
+.Renviron
