@@ -337,7 +337,8 @@ single_trial_page <- function(tb_row,
             new_items_id = NULL,
             user_id = user_id,
             feedback = FALSE,
-            feedback_type = NA
+            feedback_type = NA,
+            trial_paradigm = "call_and_response"
           )
         } else NULL
 
