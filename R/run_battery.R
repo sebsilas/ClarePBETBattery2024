@@ -42,7 +42,13 @@ run_battery <- function(title = "Playing by Ear",
 
     elts = tl,
 
-    opt = musicassessr::musicassessr_opt(setup_pages = FALSE,
+    languages = "en",
+
+    opt = musicassessr::musicassessr_opt(
+                                        setup_pages = show_music_tests,
+                                        setup_options = musicassessr::setup_pages_options(
+                                          with_additional_recording_instructions = TRUE
+                                        ),
                                          visual_notation = TRUE,
                                          app_name = app_name,
                                          get_p_id = TRUE,
@@ -142,14 +148,20 @@ suzuki_tl <- function(num_items = 24,
 
     if(show_saa){
       SAA::SAA(app_name = app_name,
-             rhythmic_item_bank = Berkowitz_easy,
-             max_goes = 1L,
+               rhythmic_item_bank = Berkowitz_easy,
+               max_goes = 1L,
              num_items = list(
                long_tones = 0L,
                arrhythmic = 0L,
-               rhythmic = 5L),
+               rhythmic = 8L),
              absolute_url = "https://musicassessr.com/pbet-strings-2024/",
-             skip_setup = 'except_microphone',
+
+             # We do some of this is make_musicassessr_test
+             SNR_test = FALSE,
+             microphone_test = FALSE,
+             get_user_info = FALSE,
+             headphones_test = FALSE,
+
              experiment_id = 3L, # Clare experiment ID
              demographics = FALSE,
              gold_msi = FALSE,
@@ -253,7 +265,7 @@ suzuki_audio_block <- function(selected_audio, instrument = c("Violin", "Cello",
     dplyr::mutate(melody_no = dplyr::row_number() ) %>%
     purrr::pmap(iterate_row, total_no_melodies = total_no_melodies, max_goes = max_goes, user_id = user_id) %>%
     unlist() %>%
-    musicassessr::wrap_musicassessr_timeline(language = "en")
+    musicassessr::wrap_musicassessr_timeline()
 
 }
 
@@ -338,7 +350,11 @@ single_trial_page <- function(tb_row,
             user_id = user_id,
             feedback = FALSE,
             feedback_type = NA,
-            trial_paradigm = "call_and_response"
+            trial_paradigm = "call_and_response",
+            additional = NA,
+            melody_block_paradigm = NA,
+            file_type = NA,
+            noise_filename = NA
           )
         } else NULL
 
