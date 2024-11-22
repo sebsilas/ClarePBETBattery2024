@@ -386,3 +386,5 @@ single_trial_page <- function(tb_row,
 # gamifyr::scp_up("GDPR.pdf")
 # gamifyr::scp_up("InformationSheet.pdf")
 # gamifyr::scp_up("Debrief.pdf")
+
+# devtools::install_github('sebsilas/ClarePBETBattery2024')
