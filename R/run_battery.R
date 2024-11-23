@@ -61,7 +61,7 @@ run_battery <- function(title = "Playing by Ear",
                                          experiment_id = 3L,
                                          user_id = 88L, # Clare's user test ID
                                          username = "there",
-                                         css = c(#"https://musicassessr.com/assets/css/style_songbird.css",
+                                         css = c("https://musicassessr.com/assets/css/style_songbird.css",
                                                  system.file('www/css/musicassessr.css', package = 'musicassessr'))),
 
     final_page = psychTestR::final_page("Thank you for taking part in the test!")
